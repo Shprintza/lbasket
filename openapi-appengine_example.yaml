@@ -1,0 +1,99 @@
+swagger: "2.0"
+info:
+  title: "Long Ben Go Backbone"
+  description: "A backbone to Go services"
+  version: "0.0.1"
+host: "${SERVICE_NAME}-dot-${GCLOUD_PROJECT}.appspot.com"
+basePath: ${SERVICE_VERSION}/${SERVICE_BASE_PATH}
+schemes:
+  - "https"
+consumes:
+  - "application/json"
+produces:
+  - "application/json"
+securityDefinitions:
+  firebase:
+    authorizationUrl: ""
+    flow: "implicit"
+    type: "oauth2"
+    # Replace YOUR-PROJECT-ID with your project ID
+    x-google-issuer: "https://securetoken.google.com/${GCLOUD_PROJECT}"
+    x-google-jwks_uri: "https://www.googleapis.com/service_accounts/v1/metadata/x509/securetoken@system.gserviceaccount.com"
+    # Optional. Replace YOUR-CLIENT-ID with your client ID
+    x-google-audiences: "${GCLOUD_PROJECT}"
+
+# Toggle this to enable firebase auth service.
+# security:
+#   - firebase: []
+paths:
+  /ping:
+    get:
+      description: "Test if api is alive."
+      operationId: "ping"
+      responses:
+        200:
+          description: "Service is working"
+          schema:
+            type: object
+            properties:
+              status:
+                $ref: "#/definitions/status"
+              message:
+                type: string
+              data:
+                $ref: "#/definitions/pong"
+
+definitions:
+  status:
+    type: string
+    enum:
+      - OK
+      - KO
+
+  pong:
+    type: object
+    properties:
+      status:
+        $ref: "#/definitions/status"
+      message:
+        type: string
+
+  errorPayload:
+    type: object
+    properties:
+      name:
+        type: string
+      message:
+        type: string
+      code:
+        type: integer
+      className:
+        type: string
+      data:
+        type: array
+        items:
+          type: object
+      errors:
+        type: array
+        items:
+          type: object
+      status:
+        $ref: "#/definitions/status"
+    required:
+      - message
+      - errors
+      - status
+
+responses:
+  NotFound:
+    description: The specified resources was not found
+    schema:
+      $ref: "#/definitions/errorPayload"
+  Unauthorized:
+    description: Unauthorized
+    schema:
+      $ref: "#/definitions/errorPayload"
+  BadRequest:
+    description: Bad request
+    schema:
+      $ref: "#/definitions/errorPayload"

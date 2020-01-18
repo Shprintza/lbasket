@@ -1,0 +1,57 @@
+image: golang
+
+clone:
+  depth: full              # SonarCloud scanner needs the full history to assign issues properly
+
+definitions:
+  caches:
+    sonar: ~/.sonar/cache  # Caching SonarCloud artifacts will speed up your build
+  
+  steps:
+    - step: &deploy-app
+        name: Deploy to dev environment on Gcloud.
+        deployment: develop   
+        image: google/cloud-sdk:alpine
+        script:
+          - echo $GCLOUD_API_KEYFILE | base64 -d > ./gcloud-api-key.json
+          - gcloud auth activate-service-account --key-file gcloud-api-key.json
+          - gcloud config set project $GCLOUD_PROJECT 
+          - apk add gettext
+          - envsubst < openapi-appengine.example.yaml >> openapi-appengine.yaml
+          - envsubst < app.example.yaml >> app.yaml
+          - echo $NETRC | base64 -d > ./.netrc
+          - gcloud -q endpoints services deploy openapi-appengine.yaml
+          - gcloud -q app deploy app.yaml
+
+    - step: &build-test-sonarcloud
+        name: Testing and analyzing project
+        deployment: test
+        script:
+          - go test -json > report.json
+          - go test -coverprofile=coverage.out
+          - pipe: sonarsource/sonarcloud-scan:0.1.5
+            variables:
+              SONAR_TOKEN: $SONAR_TOKEN
+
+pipelines:
+  branches:
+    master:
+      - step: *deploy-app
+    
+  tags:
+    rc*:
+      - step: 
+          <<: *deploy-app
+          deployment: staging
+          name: Deploy to stage environment on Gcloud.
+
+    v*:
+      - step:
+          <<: *deploy-app
+          deployment: production
+          name: Deploy to production environment on Gcloud.
+
+  # pull-requests:
+  #   '**':
+  #     - step: *build-test-sonarcloud
+      

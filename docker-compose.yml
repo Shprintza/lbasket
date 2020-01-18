@@ -1,0 +1,45 @@
+version: '3'
+services:
+  # db:
+  #   build: ./db
+  #   volumes:
+  #     - ./db/pgdata:/pgdata
+  #   ports:
+  #     - 5432:5432
+  #   environment:
+  #     - POSTGRES_USER=$DATABASE_USER
+  #     - POSTGRES_PASSWORD=$DATABASE_PASSWORD
+  #     - PGDATA=/pgdata
+
+  service:
+    build:
+      context: ./
+      dockerfile: dev.Dockerfile
+      args: 
+        - SERVICE_NAME
+    ports:
+      - $PORT:$PORT
+    volumes:
+      - ./:/$SERVICE_NAME
+      - $HOME/go/src:/go/src
+      - $HOME/go/pkg:/go/pkg
+      - $HOME/.netrc:/root/.netrc
+      # - $HOME/Downloads/gcr-pull.json:/root/key.json
+    environment:
+      - PORT
+      - ENV
+      # - DATABASE_HOST
+      # - DATABASE_PASSWORD
+      # - DATABASE_USER
+      # - DATABASE_SSL_MODE
+      # - SERVICE_DATABASE_NAME
+      # - DATABASE_MIGRATIONS_DIR
+      # - GOOGLE_APPLICATION_CREDENTIALS
+      # - GCLOUD_STORAGE_BUCKET
+      # - FIREBASE_BUCKET
+      - SERVICE_NAME
+      - SERVICE_VERSION
+      - SERVICE_BASE_PATH
+
+    # links:
+    #   - db
