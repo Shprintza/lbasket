@@ -5,16 +5,16 @@ import (
 	"strconv"
 
 	"github.com/orov-io/BlackBart/response"
-	"github.com/orov-io/BlackBart/server"
 	api "github.com/orov-io/BlackBeard"
 	"github.com/orov-io/lbasket/models"
 )
 
 const (
-	portKey      = "PORT"
-	serviceKey   = "SERVICE_BASE_PATH"
-	v1           = "v1"
-	pingEndpoint = "/ping"
+	portKey           = "PORT"
+	serviceKey        = "SERVICE_BASE_PATH"
+	v1                = "v1"
+	pingEndpoint      = "/ping"
+	newBasketEndpoint = "/basket"
 )
 
 var service = os.Getenv(serviceKey)
@@ -37,8 +37,21 @@ func Ping() (*models.Pong, error) {
 		return nil, err
 	}
 	pong := models.Pong{}
-	server.GetLogger().Info("PONG: ", pong)
 	err = response.ParseTo(resp, &pong)
 
 	return &pong, err
+}
+
+// NewBasket requests a new basket to the server.
+func NewBasket() (*models.Basket, error) {
+	client := api.MakeNewClient().WithDefaultBasePath().WithPort(port).
+		WithVersion(v1).ToService(service)
+	resp, err := client.POST(newBasketEndpoint, nil)
+	if err != nil {
+		return nil, err
+	}
+	basket := models.Basket{}
+	err = response.ParseTo(resp, &basket)
+
+	return &basket, err
 }

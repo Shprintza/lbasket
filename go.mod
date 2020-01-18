@@ -6,8 +6,7 @@ require (
 	github.com/DATA-DOG/godog v0.7.13 // indirect
 	github.com/building-microservices-with-go/chapter4 v0.0.0-20170710013534-9d81ba1ca962 // indirect
 	github.com/gin-gonic/gin v1.5.0
-	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
-	github.com/modern-go/reflect2 v1.0.1 // indirect
+	github.com/google/uuid v1.1.1
 	github.com/orov-io/BlackBart v0.0.4
 	github.com/orov-io/BlackBeard v0.0.1
 	github.com/smartystreets/goconvey v1.6.4
