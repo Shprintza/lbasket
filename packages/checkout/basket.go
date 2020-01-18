@@ -30,7 +30,9 @@ type BadgerBasketManager struct {
 	db *badger.DB
 }
 
-func newBadgerBasketManager(db *badger.DB) *BadgerBasketManager {
+// NewBadgerBasketManager returns a BadgerBasketManager with the desired
+// badger DB attached.
+func NewBadgerBasketManager(db *badger.DB) *BadgerBasketManager {
 	return &BadgerBasketManager{
 		db: db,
 	}
