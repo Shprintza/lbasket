@@ -3,6 +3,7 @@ package client_test
 import (
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/orov-io/lbasket/client"
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -26,4 +27,23 @@ func TestPing(t *testing.T) {
 			})
 		})
 	})
+}
+
+func TestNewBasket(t *testing.T) {
+	Convey(givenAClient, t, func() {
+
+		Convey(callHandlerByService, func() {
+			newBasket, err := client.NewBasket()
+			Convey(responseShouldBeOK, func() {
+
+				So(err, ShouldBeNil)
+				So(isUUID(newBasket.UUID), ShouldBeTrue)
+			})
+		})
+	})
+}
+
+func isUUID(candidate string) bool {
+	_, error := uuid.Parse(candidate)
+	return error == nil
 }
