@@ -72,3 +72,7 @@ func keyExists(key string) bool {
 
 	return err == nil
 }
+
+func getBadgerDB() *badger.DB {
+	return db
+}

@@ -13,7 +13,7 @@ Furthermore, for this project I have added to the framework the possibility of u
 
 * I use the JSON format to store baskets. I know that an approach with the encoding/base64 and encoding/gob will be better at a performance level, but JSON performance is enough for this toy example.
 
-* In order to have integrity, a list of available products is added and exposed on `GET $BASE_PATH/$SERVICE_VERSION/$SERVICE_BASE_PATH/products`. I know that it is not a requirement, but our users deserve an enjoyable experience.
+* In order to have integrity, a list of available products is added and exposed on `GET $BASE_PATH/$SERVICE_VERSION/$SERVICE_BASE_PATH/products`. I know that it is not a requirement, but our users deserve an enjoyable experience. As is not a requirement to add new products to the list, only basic functionality is provided.
 
 ## Quick start
 

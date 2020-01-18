@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/orov-io/BlackBart/server"
+	"github.com/orov-io/lbasket/packages/checkout"
 	"github.com/orov-io/lbasket/service"
 )
 
@@ -23,6 +24,10 @@ func main() {
 	}
 
 	service.AddRoutes(app)
+	err = seedProducts()
+	if err != nil {
+		log.WithError(err).Panic("Can't seed database")
+	}
 
 	environment := os.Getenv(envKey)
 
@@ -38,4 +43,14 @@ func main() {
 		log.WithError(err).Panic("Can't start the server")
 	}
 
+}
+
+// seedProducts seeds the database with available products.
+func seedProducts() error {
+	db, err := server.GetInternalDB()
+	if err != nil {
+		return err
+	}
+	productManager := checkout.NewBadgerProductManager(db)
+	return productManager.SeedProducts(checkout.GetProductSeed())
 }

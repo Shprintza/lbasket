@@ -9,10 +9,11 @@ import (
 
 // Service params
 const (
-	BasePathKey    = "SERVICE_BASE_PATH"
-	VersionKey     = "SERVICE_VERSION"
-	pingEndpoint   = "ping"
-	basketEndpoint = "basket"
+	BasePathKey      = "SERVICE_BASE_PATH"
+	VersionKey       = "SERVICE_VERSION"
+	pingEndpoint     = "ping"
+	basketEndpoint   = "basket"
+	productsEndpoint = "products"
 )
 
 var relativePath = os.Getenv(BasePathKey)
@@ -36,6 +37,13 @@ func addBasket(service *server.Service) {
 	basketGroup := service.Group(getPathTo(basketEndpoint))
 	{
 		basketGroup.POST("", newBasket)
+	}
+}
+
+func addProducts(service *server.Service) {
+	productGroup := service.Group(getPathTo(productsEndpoint))
+	{
+		productGroup.GET("", getProducts)
 	}
 }
 
