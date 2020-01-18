@@ -24,9 +24,9 @@ const (
 
 // Product models a single lana product
 type Product struct {
-	Code  string `json:"code"`
-	Name  string `json:"name"`
-	Price int    `json:"price"`
+	Code  string
+	Name  string
+	Price int
 }
 
 // ProductManager is an interface that knows how to manages the

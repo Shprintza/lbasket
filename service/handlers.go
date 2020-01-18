@@ -31,3 +31,20 @@ func newBasket(c *gin.Context) {
 
 	sendBaskedCreated(c, basket)
 }
+
+func getProducts(c *gin.Context) {
+	db, err := server.GetInternalDB()
+	if err != nil {
+		response.SendInternalError(c, err)
+		return
+	}
+
+	productManager := checkout.NewBadgerProductManager(db)
+	products, err := productManager.GetProducts()
+	if err != nil {
+		response.SendInternalError(c, err)
+		return
+	}
+
+	sendProducts(c, products)
+}

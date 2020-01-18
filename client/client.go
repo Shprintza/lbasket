@@ -10,11 +10,12 @@ import (
 )
 
 const (
-	portKey           = "PORT"
-	serviceKey        = "SERVICE_BASE_PATH"
-	v1                = "v1"
-	pingEndpoint      = "/ping"
-	newBasketEndpoint = "/basket"
+	portKey          = "PORT"
+	serviceKey       = "SERVICE_BASE_PATH"
+	v1               = "v1"
+	pingEndpoint     = "/ping"
+	basketEndpoint   = "/basket"
+	productsEndpoint = "/products"
 )
 
 var service = os.Getenv(serviceKey)
@@ -46,7 +47,7 @@ func Ping() (*models.Pong, error) {
 func NewBasket() (*models.Basket, error) {
 	client := api.MakeNewClient().WithDefaultBasePath().WithPort(port).
 		WithVersion(v1).ToService(service)
-	resp, err := client.POST(newBasketEndpoint, nil)
+	resp, err := client.POST(basketEndpoint, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -54,4 +55,18 @@ func NewBasket() (*models.Basket, error) {
 	err = response.ParseTo(resp, &basket)
 
 	return &basket, err
+}
+
+// GetAvailableProducts fetches a list of available products
+func GetAvailableProducts() ([]*models.Product, error) {
+	client := api.MakeNewClient().WithDefaultBasePath().WithPort(port).
+		WithVersion(v1).ToService(service)
+	resp, err := client.GET(productsEndpoint, nil)
+	if err != nil {
+		return nil, err
+	}
+	products := make([]*models.Product, 0)
+	err = response.ParseTo(resp, &products)
+
+	return products, err
 }

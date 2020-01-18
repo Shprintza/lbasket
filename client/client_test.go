@@ -71,7 +71,7 @@ func TestGetProducts(t *testing.T) {
 	})
 }
 
-func TestAddProduct(t *testing.T) {
+/* func TestAddProduct(t *testing.T) {
 	Convey(givenAEmptyBasket, t, func() {
 		newBasket, err := client.NewBasket()
 		updatedBasket, err := client.AddProduct()
@@ -84,4 +84,4 @@ func TestAddProduct(t *testing.T) {
 			})
 		})
 	})
-}
+} */

@@ -24,6 +24,7 @@ var servicePath = fmt.Sprintf("/%v/%v", version, relativePath)
 func AddRoutes(service *server.Service) {
 	addPong(service)
 	addBasket(service)
+	addProducts(service)
 }
 
 func addPong(service *server.Service) {

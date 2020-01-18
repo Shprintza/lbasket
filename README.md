@@ -15,6 +15,9 @@ Furthermore, for this project I have added to the framework the possibility of u
 
 * In order to have integrity, a list of available products is added and exposed on `GET $BASE_PATH/$SERVICE_VERSION/$SERVICE_BASE_PATH/products`. I know that it is not a requirement, but our users deserve an enjoyable experience. As is not a requirement to add new products to the list, only basic functionality is provided.
 
+* About the "Dealing with money as integers": Internally (the server) we deal with money as integer, as I I guess it's business logic.
+But keep on mind that we expose to the client a human readable representation of the money value. This is done so as not to expand such business logic to the client.
+
 ## Quick start
 
 Provide a _.env_ file variables with all variables founds in _[example.env](./example.env)_. Load this _.env_ file to your environment variables.
