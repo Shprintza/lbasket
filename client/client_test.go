@@ -12,6 +12,7 @@ import (
 const (
 	givenAClient         = "Given a lbasket client"
 	callHandlerByService = "When call is handler by the service"
+	newBasketCall        = "When a new basket call is done."
 	responseShouldBeOK   = "Then response should be OK"
 )
 

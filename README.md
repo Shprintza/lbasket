@@ -4,6 +4,15 @@
 
 _Lana basket_ uses [Long Ben](https://github.com/orov-io/lbasket) witch in turn uses [BlackBart](https://github.com/orov-io/BlackBart) witch wraps the [GIN](https://github.com/gin-gonic/gin) framework. Use it as a guide to enforce best practices when you build JSON HTTP servers.
 
+## Considerations
+
+* A long time ago, I learned not to repeat myself, so Im using my own framework on top on some strong utilities, as induced by the previous paragraph.
+Furthermore, for this project I have added to the framework the possibility of use an internal database (key/value), which I have not needed so far.
+
+* Given the probability of collision of a uuid, it is not checked that it already exists to avoid overwriting. If it is needed (see [uuid collisions](https://en.wikipedia.org/wiki/Universally_unique_identifier#Collisions) on wikipedia), please say it to me.
+
+* I use the JSON format to store baskets. I know that an approach with the encoding/base64 and encoding/gob will be better at a performance level, but JSON performance is enough for this toy example.
+
 ## Quick start
 
 Provide a _.env_ file variables with all variables founds in _[example.env](./example.env)_. Load this _.env_ file to your environment variables.

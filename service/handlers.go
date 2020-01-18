@@ -11,3 +11,7 @@ func pong(c *gin.Context) {
 		Message: "pong",
 	})
 }
+
+func newBasket(c *gin.Context) {
+
+}

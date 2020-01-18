@@ -40,6 +40,7 @@ services:
       - SERVICE_NAME
       - SERVICE_VERSION
       - SERVICE_BASE_PATH
+      - ENABLE_BADGER
 
     # links:
     #   - db
