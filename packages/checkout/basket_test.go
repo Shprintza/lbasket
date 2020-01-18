@@ -54,6 +54,7 @@ func TestBadgerBasketManager_New(t *testing.T) {
 		Convey("Operation is successfully", func() {
 			So(err, ShouldBeNil)
 			So(isUUID(basket.UUID), ShouldBeTrue)
+			So(keyExists(basket.UUID), ShouldBeTrue)
 		})
 	})
 }
@@ -61,4 +62,13 @@ func TestBadgerBasketManager_New(t *testing.T) {
 func isUUID(candidate string) bool {
 	_, error := uuid.Parse(candidate)
 	return error == nil
+}
+
+func keyExists(key string) bool {
+	err := db.View(func(txn *badger.Txn) error {
+		_, err := txn.Get([]byte(key))
+		return err
+	})
+
+	return err == nil
 }
