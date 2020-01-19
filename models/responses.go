@@ -8,9 +8,9 @@ type Pong struct {
 
 // Basket models and exposes a basket to the client.
 type Basket struct {
-	UUID  string        `json:"uuid"`
-	Items []*BasketItem `json:"items"`
-	Total string        `json:"total"`
+	UUID  string        `json:"uuid,omitempty"`
+	Items []*BasketItem `json:"items,omitempty"`
+	Total string        `json:"total,omitempty"`
 }
 
 // BasketItem models a chunk of same products

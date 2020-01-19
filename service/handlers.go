@@ -90,3 +90,29 @@ func addProduct(c *gin.Context) {
 
 	sendBasked(c, basket)
 }
+
+func getBasket(c *gin.Context) {
+	request := new(models.GetBasketRequest)
+	if err := c.ShouldBindUri(&request); err != nil {
+		response.SendBadRequest(c, err)
+		return
+	}
+
+	db, err := server.GetInternalDB()
+	if err != nil {
+		response.SendInternalError(c, err)
+		return
+	}
+
+	basketManager := checkout.NewBadgerBasketManager(db)
+	basket, err := basketManager.Get(request.BasketUUID)
+	if checkout.IsBaskedNotExistError(err) {
+		response.SendBadRequest(c, err)
+		return
+	} else if err != nil {
+		response.SendInternalError(c, err)
+		return
+	}
+
+	sendBasked(c, basket)
+}

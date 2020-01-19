@@ -37,6 +37,7 @@ func addPong(service *server.Service) {
 func addBasket(service *server.Service) {
 	basketGroup := service.Group(getPathTo(basketEndpoint))
 	{
+		basketGroup.GET("/:BasketUUID", getBasket)
 		basketGroup.POST("", newBasket)
 		basketGroup.POST("/:BasketUUID/products/:ProductCode", addProduct)
 	}
