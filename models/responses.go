@@ -10,6 +10,7 @@ type Pong struct {
 type Basket struct {
 	UUID  string        `json:"uuid"`
 	Items []*BasketItem `json:"items"`
+	Total string        `json:"total"`
 }
 
 // BasketItem models a chunk of same products

@@ -87,12 +87,34 @@ func AddProductToBasket(product, basket string) (*models.Basket, error) {
 	return &NewBasket, err
 }
 
+// GetBasket fetches a list of available products
+func GetBasket(basket string) (*models.Basket, error) {
+	client := api.MakeNewClient().WithDefaultBasePath().WithPort(port).
+		WithVersion(v1).ToService(service)
+	resp, err := client.GET(getGetBasketURI(basket), nil)
+	if err != nil {
+		return nil, err
+	}
+	fetchedBasket := new(models.Basket)
+	err = response.ParseTo(resp, &fetchedBasket)
+
+	return fetchedBasket, err
+}
+
 func getAddProductURI(product, basket string) string {
 	return fmt.Sprintf(
-		"%s/%s/%s/%s",
+		"%s/%s%s/%s",
 		basketEndpoint,
 		basket,
 		productsEndpoint,
 		product,
+	)
+}
+
+func getGetBasketURI(basket string) string {
+	return fmt.Sprintf(
+		"%s/%s",
+		basketEndpoint,
+		basket,
 	)
 }
