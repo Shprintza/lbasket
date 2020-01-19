@@ -18,6 +18,7 @@ func sendBasked(c *gin.Context, basket *checkout.Basket) {
 	basket2send := new(models.Basket)
 	basket2send.Items = items2send
 	basket2send.UUID = basket.UUID
+	basket2send.Total = iToEuro(basket.Total)
 	for _, item := range basket.Items {
 		basket2send.Items = append(basket2send.Items, parseItem(item))
 	}
@@ -48,6 +49,10 @@ func parseProduct(product *checkout.Product) *models.Product {
 	return &models.Product{
 		Code:  product.Code,
 		Name:  product.Name,
-		Price: fmt.Sprintf("%0.2f", float64(product.Price)/100.0),
+		Price: iToEuro(product.Price),
 	}
+}
+
+func iToEuro(value int) string {
+	return fmt.Sprintf("%0.2f€", float64(value)/100.0)
 }

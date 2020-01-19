@@ -12,6 +12,7 @@ import (
 type Basket struct {
 	UUID  string        `json:"uuid"`
 	Items []*BasketItem `json:"items"`
+	Total int
 }
 
 func newBasket() *Basket {
@@ -36,6 +37,16 @@ func (b *Basket) push(product *Product) {
 
 	b.Items = append(b.Items, newItem)
 	return
+}
+
+func (b *Basket) calcTotal() *Basket {
+	var total int
+	for _, item := range b.Items {
+		total += item.Product.Price * item.Amount
+	}
+
+	b.Total = total
+	return b
 }
 
 // BasketItem models a chunk of same products
@@ -107,7 +118,11 @@ func (m *BadgerBasketManager) Get(uuid string) (*Basket, error) {
 		return err
 	})
 
-	return basket, err
+	if err != nil {
+		return nil, err
+	}
+
+	return basket.calcTotal(), err
 }
 
 // AddProductToBasket adds a product to basket saving changes in database.
@@ -116,6 +131,7 @@ func (m *BadgerBasketManager) AddProductToBasket(
 	basket *Basket,
 ) (*Basket, error) {
 	basket.push(product)
+	basket.calcTotal()
 	return basket, m.Save(basket)
 }
 
