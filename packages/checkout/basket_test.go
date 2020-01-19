@@ -48,13 +48,14 @@ func TestNewBadgerBasketManager(t *testing.T) {
 
 func TestBadgerBasketManager_New(t *testing.T) {
 	Convey("Given a new basket request", t, func() {
-		badgerManager := checkout.NewBadgerBasketManager(db)
-		basket, err := badgerManager.New()
+		basketManager := checkout.NewBadgerBasketManager(db)
+		basket, err := basketManager.New()
 
 		Convey("Operation is successfully", func() {
 			So(err, ShouldBeNil)
 			So(isUUID(basket.UUID), ShouldBeTrue)
-			So(keyExists(basket.UUID), ShouldBeTrue)
+			exist := keyExists(basket.UUID)
+			So(exist, ShouldBeTrue)
 		})
 	})
 }
@@ -64,6 +65,10 @@ func isUUID(candidate string) bool {
 	return error == nil
 }
 
+func getBadgerDB() *badger.DB {
+	return db
+}
+
 func keyExists(key string) bool {
 	err := db.View(func(txn *badger.Txn) error {
 		_, err := txn.Get([]byte(key))
@@ -71,8 +76,4 @@ func keyExists(key string) bool {
 	})
 
 	return err == nil
-}
-
-func getBadgerDB() *badger.DB {
-	return db
 }

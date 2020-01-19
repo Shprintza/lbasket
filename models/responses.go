@@ -1,7 +1,5 @@
 package models
 
-import "github.com/orov-io/lbasket/packages/checkout"
-
 // Pong models a ping response.
 type Pong struct {
 	Status  string `json:"status"`
@@ -10,7 +8,14 @@ type Pong struct {
 
 // Basket models and exposes a basket to the client.
 type Basket struct {
-	*checkout.Basket
+	UUID  string        `json:"uuid"`
+	Items []*BasketItem `json:"items"`
+}
+
+// BasketItem models a chunk of same products
+type BasketItem struct {
+	Product *Product `json:"product"`
+	Amount  int      `json:"amount"`
 }
 
 // Product models and exposes a product to the client.

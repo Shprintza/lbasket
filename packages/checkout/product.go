@@ -2,9 +2,12 @@ package checkout
 
 import (
 	"encoding/json"
+	"fmt"
+
 	badger "github.com/dgraph-io/badger/v2"
 )
 
+// ProductsKey is the kew to store all available products
 const ProductsKey = "lanaProducts"
 
 // Available products
@@ -34,6 +37,9 @@ type Product struct {
 // This provide an abstraction level over the DB.
 type ProductManager interface {
 	SeedProducts(product *Product) error
+	GetProducts() ([]*Product, error)
+	IsProductAvailable(string) (bool, error)
+	Get(string) (*Product, error)
 }
 
 // BadgerProductManager implements the ProductManager interface on top
@@ -86,6 +92,31 @@ func (m *BadgerProductManager) GetProducts() ([]*Product, error) {
 	return products, err
 }
 
+// IsProductAvailable checks if a product exist on DB by its code.
+func (m *BadgerProductManager) IsProductAvailable(code string) (bool, error) {
+	products, err := m.GetProducts()
+	if err != nil {
+		return false, err
+	}
+
+	return isProductIn(code, products), nil
+}
+
+// Get returns a product from database.
+func (m *BadgerProductManager) Get(code string) (*Product, error) {
+	products, err := m.GetProducts()
+	if err != nil {
+		return nil, err
+	}
+
+	product := getProduct(code, products)
+	if product == nil {
+		return nil, NewProductNotExistError(code)
+	}
+
+	return product, nil
+}
+
 // GetProductSeed returns the seed for the database.
 //
 // Disclaimer: I know that this is not the best site to store this.
@@ -109,4 +140,45 @@ func GetProductSeed() []*Product {
 			Price: MugPrice,
 		},
 	}
+}
+
+func isProductIn(code string, products []*Product) bool {
+	for _, product := range products {
+		if product.Code == code {
+			return true
+		}
+	}
+	return false
+}
+
+func getProduct(code string, products []*Product) *Product {
+	for _, product := range products {
+		if product.Code == code {
+			return product
+		}
+	}
+	return nil
+}
+
+// ProductNotExistError is used when we try to get a product that does
+// not exists in DB
+type ProductNotExistError struct {
+	ProductCode string
+}
+
+func (e *ProductNotExistError) Error() string {
+	return fmt.Sprintf("Product %v does not exists", e.ProductCode)
+}
+
+// NewProductNotExistError returns a new ProductNotExistErrorError error.
+func NewProductNotExistError(code string) error {
+	return &ProductNotExistError{
+		ProductCode: code,
+	}
+}
+
+// IsProductNotExistError checks if the error is a ProductNotExistError error.
+func IsProductNotExistError(err error) bool {
+	_, ok := err.(*ProductNotExistError)
+	return ok
 }

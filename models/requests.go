@@ -30,3 +30,9 @@ func (request *PingRequest) Bind(c *gin.Context) error {
 
 	return nil
 }
+
+// AddProductRequest models a request to add a product to a basket
+type AddProductRequest struct {
+	BasketUUID  string `uri:"BasketUUID" binding:"required,uuid"`
+	ProductCode string `uri:"ProductCode" binding:"required"`
+}
