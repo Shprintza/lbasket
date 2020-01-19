@@ -3,6 +3,7 @@ package checkout
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 
 	badger "github.com/dgraph-io/badger/v2"
 	"github.com/google/uuid"
@@ -42,7 +43,7 @@ func (b *Basket) push(product *Product) {
 func (b *Basket) calcTotal() *Basket {
 	var total int
 	for _, item := range b.Items {
-		total += item.Product.Price * item.Amount
+		total += item.calcTotal()
 	}
 
 	b.Total = total
@@ -57,6 +58,22 @@ type BasketItem struct {
 
 func (ib *BasketItem) isProduct(code string) bool {
 	return ib.Product.Code == code
+}
+
+func (ib *BasketItem) calcTotal() int {
+	switch ib.Product.Code {
+	case PenCode:
+		return ib.Product.Price * int(math.Ceil(float64(ib.Amount)*0.5))
+	case TShirtCode:
+		pricePerUnit := ib.Product.Price
+		if ib.Amount >= 3 {
+			pricePerUnit = (ib.Product.Price * 3) / 4
+		}
+		return pricePerUnit * ib.Amount
+
+	default:
+		return ib.Product.Price * ib.Amount
+	}
 }
 
 // BasketManager is an interface that knows how to manages the

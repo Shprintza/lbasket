@@ -18,6 +18,8 @@ Furthermore, for this project I have added to the framework the possibility of u
 * About the "Dealing with money as integers": Internally (the server) we deal with money as integer, as I I guess it's business logic.
 But keep on mind that we expose to the client a human readable representation of the money value. This is done so as not to expand such business logic to the client.
 
+* Discounts logic is in code. We are aware that the discounts could have been created in the database and applied dynamically; but given the scope of the challenge it is left in the code. In case we will want discounts living in DB, we will need to create a discountManager that deals with the logic.
+
 ## Quick start
 
 Provide a _.env_ file variables with all variables founds in _[example.env](./example.env)_. Load this _.env_ file to your environment variables.
