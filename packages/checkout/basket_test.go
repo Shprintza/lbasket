@@ -54,8 +54,89 @@ func TestBadgerBasketManager_New(t *testing.T) {
 		Convey("Operation is successfully", func() {
 			So(err, ShouldBeNil)
 			So(isUUID(basket.UUID), ShouldBeTrue)
-			exist := keyExists(basket.UUID)
-			So(exist, ShouldBeTrue)
+			basket, err := basketManager.Get(basket.UUID)
+			So(err, ShouldBeNil)
+			So(basket.Items, ShouldBeEmpty)
+		})
+	})
+}
+
+func TestBadgerBasketManager_Get(t *testing.T) {
+	Convey("Given a basket", t, func() {
+		basketManager := checkout.NewBadgerBasketManager(db)
+		basket := &checkout.Basket{
+			UUID: uuid.New().String(),
+		}
+		anotherBasket := &checkout.Basket{
+			UUID: uuid.New().String(),
+		}
+		basketManager.Save(basket)
+
+		Convey("When you try to fetch it", func() {
+			fetchedBasket, err := basketManager.Get(basket.UUID)
+			Convey("Operation is successfully", func() {
+				So(err, ShouldBeNil)
+				So(fetchedBasket.UUID, ShouldEqual, basket.UUID)
+			})
+
+			Convey("Another basket is not saved", func() {
+				_, err := basketManager.Get(anotherBasket.UUID)
+				So(checkout.IsBaskedNotExistError(err), ShouldBeTrue)
+
+			})
+		})
+	})
+}
+
+func TestBadgerBasketManager__AddProductToBasket(t *testing.T) {
+	Convey("Given a new basket", t, func() {
+		basketManager := checkout.NewBadgerBasketManager(db)
+		basket, _ := basketManager.New()
+
+		Convey("When you add a new products to the basket", func() {
+			product := checkout.GetProductSeed()[0]
+			basket, err := basketManager.AddProductToBasket(product, basket)
+
+			Convey("Operation is successfully", func() {
+				So(err, ShouldBeNil)
+				basket, err := basketManager.Get(basket.UUID)
+				So(err, ShouldBeNil)
+				So(len(basket.Items), ShouldEqual, 1)
+				So(basket.Items[0].Product.Code, ShouldEqual, product.Code)
+			})
+		})
+
+		Convey("When you add a two identical new products to the basket", func() {
+			product := checkout.GetProductSeed()[0]
+			basket, err1 := basketManager.AddProductToBasket(product, basket)
+			basket, err2 := basketManager.AddProductToBasket(product, basket)
+
+			Convey("Operation is successfully", func() {
+				So(err1, ShouldBeNil)
+				So(err2, ShouldBeNil)
+				basket, err := basketManager.Get(basket.UUID)
+				So(err, ShouldBeNil)
+				So(len(basket.Items), ShouldEqual, 1)
+				So(basket.Items[0].Product.Code, ShouldEqual, product.Code)
+				So(basket.Items[0].Amount, ShouldEqual, 2)
+			})
+		})
+
+		Convey("When you add a two different new products to the basket", func() {
+			product := checkout.GetProductSeed()[0]
+			product2 := checkout.GetProductSeed()[1]
+			basket, err1 := basketManager.AddProductToBasket(product, basket)
+			basket, err2 := basketManager.AddProductToBasket(product2, basket)
+
+			Convey("Operation is successfully", func() {
+				So(err1, ShouldBeNil)
+				So(err2, ShouldBeNil)
+				basket, err := basketManager.Get(basket.UUID)
+				So(err, ShouldBeNil)
+				So(len(basket.Items), ShouldEqual, 2)
+				So(basket.Items[0].Amount, ShouldEqual, 1)
+				So(basket.Items[0].Amount, ShouldEqual, 1)
+			})
 		})
 	})
 }
@@ -67,13 +148,4 @@ func isUUID(candidate string) bool {
 
 func getBadgerDB() *badger.DB {
 	return db
-}
-
-func keyExists(key string) bool {
-	err := db.View(func(txn *badger.Txn) error {
-		_, err := txn.Get([]byte(key))
-		return err
-	})
-
-	return err == nil
 }

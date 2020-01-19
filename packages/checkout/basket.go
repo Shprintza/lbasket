@@ -136,15 +136,6 @@ func (m *BadgerBasketManager) Save(basket *Basket) error {
 	return err
 }
 
-func keyExistsInDB(key string, db *badger.DB) (bool, error) {
-	err := db.View(func(txn *badger.Txn) error {
-		_, err := txn.Get([]byte(key))
-		return err
-	})
-
-	return err == nil, err
-}
-
 // BaskedNotExistError is used when we try to get a basket that does
 // not exists in DB
 type BaskedNotExistError struct {
