@@ -12,7 +12,7 @@ const (
 	BasePathKey      = "SERVICE_BASE_PATH"
 	VersionKey       = "SERVICE_VERSION"
 	pingEndpoint     = "ping"
-	basketEndpoint   = "basket"
+	basketEndpoint   = "baskets"
 	productsEndpoint = "products"
 )
 
@@ -38,7 +38,7 @@ func addBasket(service *server.Service) {
 	basketGroup := service.Group(getPathTo(basketEndpoint))
 	{
 		basketGroup.POST("", newBasket)
-		basketGroup.POST("/:BasketUUID/product/:ProductCode", addProduct)
+		basketGroup.POST("/:BasketUUID/products/:ProductCode", addProduct)
 	}
 }
 

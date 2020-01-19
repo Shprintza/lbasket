@@ -1,6 +1,7 @@
 package client
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 
@@ -14,7 +15,7 @@ const (
 	serviceKey       = "SERVICE_BASE_PATH"
 	v1               = "v1"
 	pingEndpoint     = "/ping"
-	basketEndpoint   = "/basket"
+	basketEndpoint   = "/baskets"
 	productsEndpoint = "/products"
 )
 
@@ -69,4 +70,29 @@ func GetAvailableProducts() ([]*models.Product, error) {
 	err = response.ParseTo(resp, &products)
 
 	return products, err
+}
+
+// AddProductToBasket requests a new basket to the server.
+func AddProductToBasket(product, basket string) (*models.Basket, error) {
+	client := api.MakeNewClient().WithDefaultBasePath().WithPort(port).
+		WithVersion(v1).ToService(service)
+	uri := getAddProductURI(product, basket)
+	resp, err := client.POST(uri, nil)
+	if err != nil {
+		return nil, err
+	}
+	NewBasket := models.Basket{}
+	err = response.ParseTo(resp, &NewBasket)
+
+	return &NewBasket, err
+}
+
+func getAddProductURI(product, basket string) string {
+	return fmt.Sprintf(
+		"%s/%s/%s/%s",
+		basketEndpoint,
+		basket,
+		productsEndpoint,
+		product,
+	)
 }

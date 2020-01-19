@@ -73,14 +73,20 @@ func TestGetProducts(t *testing.T) {
 
 func TestAddProduct(t *testing.T) {
 	Convey(givenAEmptyBasket, t, func() {
-		newBasket, err := client.NewBasket()
-		updatedBasket, err := client.AddProduct()
+		newBasket, _ := client.NewBasket()
+		products, _ := client.GetAvailableProducts()
+		product := products[0].Code
+		updatedBasket, err := client.AddProductToBasket(
+			product,
+			newBasket.UUID,
+		)
 
 		Convey(tryToAddExistingProduct, func() {
 			Convey(productIsAdded, func() {
-
 				So(err, ShouldBeNil)
-				So(isUUID(newBasket.UUID), ShouldBeTrue)
+				So(updatedBasket.UUID, ShouldEqual, newBasket.UUID)
+				So(len(updatedBasket.Items), ShouldEqual, 1)
+				So(updatedBasket.Items[0].Product.Code, ShouldEqual, product)
 			})
 		})
 	})
