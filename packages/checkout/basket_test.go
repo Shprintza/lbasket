@@ -57,6 +57,7 @@ func TestBadgerBasketManager_New(t *testing.T) {
 			basket, err := basketManager.Get(basket.UUID)
 			So(err, ShouldBeNil)
 			So(basket.Items, ShouldBeEmpty)
+			So(basket.Total, ShouldEqual, 0)
 		})
 	})
 }
@@ -103,6 +104,7 @@ func TestBadgerBasketManager__AddProductToBasket(t *testing.T) {
 				So(err, ShouldBeNil)
 				So(len(basket.Items), ShouldEqual, 1)
 				So(basket.Items[0].Product.Code, ShouldEqual, product.Code)
+				So(basket.Total, ShouldEqual, product.Price)
 			})
 		})
 
@@ -119,6 +121,7 @@ func TestBadgerBasketManager__AddProductToBasket(t *testing.T) {
 				So(len(basket.Items), ShouldEqual, 1)
 				So(basket.Items[0].Product.Code, ShouldEqual, product.Code)
 				So(basket.Items[0].Amount, ShouldEqual, 2)
+				So(basket.Total, ShouldEqual, product.Price*2)
 			})
 		})
 
@@ -135,7 +138,8 @@ func TestBadgerBasketManager__AddProductToBasket(t *testing.T) {
 				So(err, ShouldBeNil)
 				So(len(basket.Items), ShouldEqual, 2)
 				So(basket.Items[0].Amount, ShouldEqual, 1)
-				So(basket.Items[0].Amount, ShouldEqual, 1)
+				So(basket.Items[1].Amount, ShouldEqual, 1)
+				So(basket.Total, ShouldEqual, product.Price+product2.Price)
 			})
 		})
 	})
