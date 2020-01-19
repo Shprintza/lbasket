@@ -1,10 +1,12 @@
 package client_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/google/uuid"
 	"github.com/orov-io/lbasket/client"
+	"github.com/orov-io/lbasket/packages/checkout"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -22,6 +24,12 @@ const (
 	productIsNotAdded            = "Then product is not added"
 	tryToGetAListOfProducts      = "When you request to get a list of available products"
 	availableProductsAreReturned = "Then a list of available products is returned"
+)
+
+const (
+	PenCode    = checkout.PenCode
+	MugCode    = checkout.MugCode
+	TShirtCode = checkout.TShirtCode
 )
 
 func TestPing(t *testing.T) {
@@ -90,4 +98,40 @@ func TestAddProduct(t *testing.T) {
 			})
 		})
 	})
+}
+
+func TestGetBasket(t *testing.T) {
+	testData := getGetBasketTestData()
+	Convey(givenAEmptyBasket, t, func() {
+		basket, _ := client.NewBasket()
+
+		for value, products := range testData {
+			Convey(fmt.Sprintf("When we fill it with %s", products), func() {
+				fillBasketWithProducts(basket.UUID, products)
+
+				Convey("Total amount is correct", func() {
+					updatedBasket, err := client.GetBasket(basket.UUID)
+					So(err, ShouldBeNil)
+					So(updatedBasket.UUID, ShouldEqual, basket.UUID)
+					So(updatedBasket.Total, ShouldEqual, value)
+				})
+			})
+		}
+	})
+}
+
+func fillBasketWithProducts(basket string, products []string) {
+	for _, product := range products {
+		client.AddProductToBasket(product, basket)
+	}
+
+}
+
+func getGetBasketTestData() map[string][]string {
+	data := make(map[string][]string, 0)
+	data["32.50€"] = []string{PenCode, TShirtCode, MugCode}
+	data["25.00€"] = []string{PenCode, TShirtCode, PenCode}
+	data["65.00€"] = []string{TShirtCode, TShirtCode, TShirtCode, PenCode, TShirtCode}
+	data["62.50€"] = []string{PenCode, TShirtCode, PenCode, PenCode, MugCode, TShirtCode, TShirtCode}
+	return data
 }
