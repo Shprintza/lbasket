@@ -54,5 +54,7 @@ func parseProduct(product *checkout.Product) *models.Product {
 }
 
 func iToEuro(value int) string {
-	return fmt.Sprintf("%0.2f€", float64(value)/100.0)
+	integer := value / 100
+	decimals := value % 100
+	return fmt.Sprintf("%v.%v€", integer, decimals)
 }

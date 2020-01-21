@@ -1,8 +1,6 @@
 package checkout
 
 import (
-	"math"
-
 	"github.com/google/uuid"
 )
 
@@ -60,7 +58,7 @@ func (ib *BasketItem) isProduct(code string) bool {
 func (ib *BasketItem) calcTotal() int {
 	switch ib.Product.Code {
 	case PenCode:
-		return ib.Product.Price * int(math.Ceil(float64(ib.Amount)*0.5))
+		return ib.Product.Price * ceilDivisionBy2(ib.Amount)
 	case TShirtCode:
 		pricePerUnit := ib.Product.Price
 		if ib.Amount >= 3 {
@@ -71,6 +69,18 @@ func (ib *BasketItem) calcTotal() int {
 	default:
 		return ib.Product.Price * ib.Amount
 	}
+}
+
+func ceilDivisionBy2(amount int) int {
+	if amount == 0 {
+		return 0
+	}
+
+	if amount%2 == 0 {
+		return amount / 2
+	}
+
+	return (amount / 2) + 1
 }
 
 // BasketDB is an interface that knows how to CRUD a basket on actual db
