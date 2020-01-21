@@ -7,10 +7,11 @@ import (
 	badger "github.com/dgraph-io/badger/v2"
 	"github.com/google/uuid"
 	"github.com/orov-io/lbasket/packages/checkout"
+	"github.com/orov-io/lbasket/packages/lanabadger"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-var db *badger.DB
+var db *lanabadger.DB
 
 func TestMain(m *testing.M) {
 	setup()
@@ -26,19 +27,20 @@ func setup() {
 func initDB() {
 	opt := badger.DefaultOptions("").WithInMemory(true)
 	var err error
-	db, err = badger.Open(opt)
+	innerDB, err := badger.Open(opt)
 	if err != nil {
 		panic(err)
 	}
+	db = lanabadger.New(innerDB)
 }
 
 func shutdown() {
 	db.Close()
 }
 
-func TestNewBadgerBasketManager(t *testing.T) {
+func TestNewBasketManager(t *testing.T) {
 	Convey("Given a badger based basket manager", t, func() {
-		badgerManager := checkout.NewBadgerBasketManager(db)
+		badgerManager := checkout.NewBasketManager(db)
 
 		Convey("A valid manager is created", func() {
 			So(badgerManager, ShouldNotBeNil)
@@ -48,7 +50,7 @@ func TestNewBadgerBasketManager(t *testing.T) {
 
 func TestBadgerBasketManager_New(t *testing.T) {
 	Convey("Given a new basket request", t, func() {
-		basketManager := checkout.NewBadgerBasketManager(db)
+		basketManager := checkout.NewBasketManager(db)
 		basket, err := basketManager.New()
 
 		Convey("Operation is successfully", func() {
@@ -64,7 +66,7 @@ func TestBadgerBasketManager_New(t *testing.T) {
 
 func TestBadgerBasketManager_Get(t *testing.T) {
 	Convey("Given a basket", t, func() {
-		basketManager := checkout.NewBadgerBasketManager(db)
+		basketManager := checkout.NewBasketManager(db)
 		basket := &checkout.Basket{
 			UUID: uuid.New().String(),
 		}
@@ -82,7 +84,7 @@ func TestBadgerBasketManager_Get(t *testing.T) {
 
 			Convey("Another basket is not saved", func() {
 				_, err := basketManager.Get(anotherBasket.UUID)
-				So(checkout.IsBaskedNotExistError(err), ShouldBeTrue)
+				So(err, ShouldBeError)
 
 			})
 		})
@@ -91,7 +93,7 @@ func TestBadgerBasketManager_Get(t *testing.T) {
 
 func TestBadgerBasketManager__AddProductToBasket(t *testing.T) {
 	Convey("Given a new basket", t, func() {
-		basketManager := checkout.NewBadgerBasketManager(db)
+		basketManager := checkout.NewBasketManager(getDB())
 		basket, _ := basketManager.New()
 
 		Convey("When you add a new products to the basket", func() {
@@ -105,23 +107,6 @@ func TestBadgerBasketManager__AddProductToBasket(t *testing.T) {
 				So(len(basket.Items), ShouldEqual, 1)
 				So(basket.Items[0].Product.Code, ShouldEqual, product.Code)
 				So(basket.Total, ShouldEqual, product.Price)
-			})
-		})
-
-		Convey("When you add a two identical new products to the basket", func() {
-			product := checkout.GetProductSeed()[0]
-			basket, err1 := basketManager.AddProductToBasket(product, basket)
-			basket, err2 := basketManager.AddProductToBasket(product, basket)
-
-			Convey("Operation is successfully", func() {
-				So(err1, ShouldBeNil)
-				So(err2, ShouldBeNil)
-				basket, err := basketManager.Get(basket.UUID)
-				So(err, ShouldBeNil)
-				So(len(basket.Items), ShouldEqual, 1)
-				So(basket.Items[0].Product.Code, ShouldEqual, product.Code)
-				So(basket.Items[0].Amount, ShouldEqual, 2)
-				So(basket.Total, ShouldEqual, product.Price*2)
 			})
 		})
 
@@ -145,11 +130,43 @@ func TestBadgerBasketManager__AddProductToBasket(t *testing.T) {
 	})
 }
 
+func testPenDiscount(t *testing.T) {
+	Convey("Given a new basket", t, func() {
+		basketManager := checkout.NewBasketManager(getDB())
+		basket, _ := basketManager.New()
+
+		Convey("When you add a two identical new products to the basket", func() {
+			product, dbError := getProduct(checkout.PenCode)
+			basket, err1 := basketManager.AddProductToBasket(product, basket)
+			basket, err2 := basketManager.AddProductToBasket(product, basket)
+
+			Convey("Operation is successfully", func() {
+				So(dbError, ShouldBeNil)
+				So(err1, ShouldBeNil)
+				So(err2, ShouldBeNil)
+				basket, err := basketManager.Get(basket.UUID)
+				So(err, ShouldBeNil)
+				So(len(basket.Items), ShouldEqual, 1)
+				So(basket.Items[0].Product.Code, ShouldEqual, checkout.PenCode)
+				So(basket.Items[0].Amount, ShouldEqual, 2)
+				So(basket.Total, ShouldEqual, product.Price/2)
+			})
+		})
+	})
+}
+
 func isUUID(candidate string) bool {
 	_, error := uuid.Parse(candidate)
 	return error == nil
 }
 
-func getBadgerDB() *badger.DB {
+func getDB() *lanabadger.DB {
 	return db
+}
+
+// This function always seed db first. It a lazy implementation to test purposes.
+func getProduct(code string) (*checkout.Product, error) {
+	productManager := checkout.NewProductManager(getDB())
+	productManager.SeedProducts(checkout.GetProductSeed())
+	return productManager.Get(checkout.MugCode)
 }

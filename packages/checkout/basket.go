@@ -1,11 +1,8 @@
 package checkout
 
 import (
-	"encoding/json"
-	"fmt"
 	"math"
 
-	badger "github.com/dgraph-io/badger/v2"
 	"github.com/google/uuid"
 )
 
@@ -76,122 +73,62 @@ func (ib *BasketItem) calcTotal() int {
 	}
 }
 
-// BasketManager is an interface that knows how to manages the
-// basket entities livecycle.
+// BasketDB is an interface that knows how to CRUD a basket on actual db
 // This provide an abstraction level over the DB
-type BasketManager interface {
-	New() (*Basket, error)
-	Exists() (bool, error)
-	AddProductToBasket(string, string) (*Basket, error)
+type BasketDB interface {
+	SaveBasket(basket *Basket) error
+	GetBasket(uuid string) (*Basket, error)
+	IsBaskedNotExistError(error) bool
 }
 
-// BadgerBasketManager implements the BasketManager interface on top
-// on the badger DB. This allow us to be thread-safe without an external DB.
-type BadgerBasketManager struct {
-	db *badger.DB
+// BasketManager implements a manager on top of the BasketDB interface
+// This dependency injection of a interface allow us to change or DB with
+// little effort
+type BasketManager struct {
+	db BasketDB
 }
 
-// NewBadgerBasketManager returns a BadgerBasketManager with the desired
+// NewBasketManager returns a BasketManager with the desired
 // badger DB attached.
-func NewBadgerBasketManager(db *badger.DB) *BadgerBasketManager {
-	return &BadgerBasketManager{
+func NewBasketManager(db BasketDB) *BasketManager {
+	return &BasketManager{
 		db: db,
 	}
 }
 
 // New returns a new basket. This function assert that new basket is saved.
-func (m *BadgerBasketManager) New() (*Basket, error) {
+func (m *BasketManager) New() (*Basket, error) {
 	basket := newBasket()
-	basket2store, err := json.Marshal(basket)
-	if err != nil {
-		return nil, err
-	}
-	err = m.db.Update(func(txn *badger.Txn) error {
-		txn.Set(
-			[]byte(basket.UUID),
-			[]byte(basket2store),
-		)
-		return nil
-	})
+	err := m.db.SaveBasket(basket)
 
 	return basket, err
 }
 
 // Get fetches and returns desired basket if exists.
-func (m *BadgerBasketManager) Get(uuid string) (*Basket, error) {
-	basket := new(Basket)
-	err := m.db.View(func(txn *badger.Txn) error {
-		item, err := txn.Get([]byte(uuid))
-		if isBadgerKeyNotFoundError(err) {
-			return NewBaskedNotExistError(uuid)
-		} else if err != nil {
-			return err
-		}
-
-		err = item.Value(func(val []byte) error {
-			err := json.Unmarshal(val, &basket)
-			return err
-		})
-		return err
-	})
-
-	if err != nil {
-		return nil, err
-	}
+func (m *BasketManager) Get(uuid string) (*Basket, error) {
+	basket, err := m.db.GetBasket(uuid)
 
 	return basket.calcTotal(), err
 }
 
+// Save stores a Basket into database
+func (m *BasketManager) Save(basket *Basket) error {
+	return m.db.SaveBasket(basket)
+
+}
+
 // AddProductToBasket adds a product to basket saving changes in database.
-func (m *BadgerBasketManager) AddProductToBasket(
+func (m *BasketManager) AddProductToBasket(
 	product *Product,
 	basket *Basket,
 ) (*Basket, error) {
 	basket.push(product)
 	basket.calcTotal()
-	return basket, m.Save(basket)
+	return basket, m.db.SaveBasket(basket)
 }
 
-// Save updates or create a basket in database.
-func (m *BadgerBasketManager) Save(basket *Basket) error {
-	basket2store, err := json.Marshal(basket)
-	if err != nil {
-		return err
-	}
-	err = m.db.Update(func(txn *badger.Txn) error {
-		err := txn.Set(
-			[]byte(basket.UUID),
-			[]byte(basket2store),
-		)
-		return err
-	})
-
-	return err
-}
-
-// BaskedNotExistError is used when we try to get a basket that does
-// not exists in DB
-type BaskedNotExistError struct {
-	BasketUUID string
-}
-
-func (e *BaskedNotExistError) Error() string {
-	return fmt.Sprintf("Basket %v does not exists", e.BasketUUID)
-}
-
-// NewBaskedNotExistError returns a new BaskedNotExistErrorError error.
-func NewBaskedNotExistError(uuid string) error {
-	return &BaskedNotExistError{
-		BasketUUID: uuid,
-	}
-}
-
-// IsBaskedNotExistError checks if the error is a BaskedNotExistError error.
-func IsBaskedNotExistError(err error) bool {
-	_, ok := err.(*BaskedNotExistError)
-	return ok
-}
-
-func isBadgerKeyNotFoundError(err error) bool {
-	return err == badger.ErrKeyNotFound
+// IsBaskedNotExistError is raised when yo try to fetch a basket that is not
+// found in DB
+func (m *BasketManager) IsBaskedNotExistError(err error) bool {
+	return m.db.IsBaskedNotExistError(err)
 }

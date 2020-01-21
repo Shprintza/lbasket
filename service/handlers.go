@@ -6,6 +6,7 @@ import (
 	"github.com/orov-io/BlackBart/server"
 	"github.com/orov-io/lbasket/models"
 	"github.com/orov-io/lbasket/packages/checkout"
+	"github.com/orov-io/lbasket/packages/lanabadger"
 )
 
 func pong(c *gin.Context) {
@@ -16,13 +17,13 @@ func pong(c *gin.Context) {
 }
 
 func newBasket(c *gin.Context) {
-	db, err := server.GetInternalDB()
+	db, err := getLanaDB()
 	if err != nil {
 		response.SendInternalError(c, err)
 		return
 	}
 
-	basketManager := checkout.NewBadgerBasketManager(db)
+	basketManager := checkout.NewBasketManager(db)
 	basket, err := basketManager.New()
 	if err != nil {
 		response.SendInternalError(c, err)
@@ -33,14 +34,14 @@ func newBasket(c *gin.Context) {
 }
 
 func getProducts(c *gin.Context) {
-	db, err := server.GetInternalDB()
+	db, err := getLanaDB()
 	if err != nil {
 		response.SendInternalError(c, err)
 		return
 	}
 
-	productManager := checkout.NewBadgerProductManager(db)
-	products, err := productManager.GetProducts()
+	productManager := checkout.NewProductManager(db)
+	products, err := productManager.GetAll()
 	if err != nil {
 		response.SendInternalError(c, err)
 		return
@@ -56,15 +57,15 @@ func addProduct(c *gin.Context) {
 		return
 	}
 
-	db, err := server.GetInternalDB()
+	db, err := getLanaDB()
 	if err != nil {
 		response.SendInternalError(c, err)
 		return
 	}
 
-	basketManager := checkout.NewBadgerBasketManager(db)
+	basketManager := checkout.NewBasketManager(db)
 	basket, err := basketManager.Get(request.BasketUUID)
-	if checkout.IsBaskedNotExistError(err) {
+	if basketManager.IsBaskedNotExistError(err) {
 		response.SendBadRequest(c, err)
 		return
 	} else if err != nil {
@@ -72,9 +73,9 @@ func addProduct(c *gin.Context) {
 		return
 	}
 
-	productManager := checkout.NewBadgerProductManager(db)
+	productManager := checkout.NewProductManager(db)
 	product, err := productManager.Get(request.ProductCode)
-	if checkout.IsProductNotExistError(err) {
+	if productManager.IsProductNotExistError(err) {
 		response.SendBadRequest(c, err)
 		return
 	} else if err != nil {
@@ -98,15 +99,15 @@ func getBasket(c *gin.Context) {
 		return
 	}
 
-	db, err := server.GetInternalDB()
+	db, err := getLanaDB()
 	if err != nil {
 		response.SendInternalError(c, err)
 		return
 	}
 
-	basketManager := checkout.NewBadgerBasketManager(db)
+	basketManager := checkout.NewBasketManager(db)
 	basket, err := basketManager.Get(request.BasketUUID)
-	if checkout.IsBaskedNotExistError(err) {
+	if basketManager.IsBaskedNotExistError(err) {
 		response.SendBadRequest(c, err)
 		return
 	} else if err != nil {
@@ -115,4 +116,10 @@ func getBasket(c *gin.Context) {
 	}
 
 	sendBasked(c, basket)
+}
+
+func getLanaDB() (checkout.DB, error) {
+	db, err := server.GetInternalDB()
+
+	return lanabadger.New(db), err
 }

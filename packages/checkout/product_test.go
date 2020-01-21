@@ -5,12 +5,13 @@ import (
 
 	badger "github.com/dgraph-io/badger/v2"
 	"github.com/orov-io/lbasket/packages/checkout"
+	"github.com/orov-io/lbasket/packages/lanabadger"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-func TestNewBadgerProductManager(t *testing.T) {
+func TestProductManager(t *testing.T) {
 	Convey("Given a badger based product manager", t, func() {
-		productManager := checkout.NewBadgerProductManager(getBadgerDB())
+		productManager := checkout.NewProductManager(getDB())
 
 		Convey("A valid manager is created", func() {
 			So(productManager, ShouldNotBeNil)
@@ -20,17 +21,17 @@ func TestNewBadgerProductManager(t *testing.T) {
 
 func TestBadgerProductManager_SeedProducts(t *testing.T) {
 	Convey("Given a badger based product manager", t, func() {
-		productManager := checkout.NewBadgerProductManager(db)
+		productManager := checkout.NewProductManager(db)
 
 		Convey("When we seed the database", func() {
 			err := productManager.SeedProducts(checkout.GetProductSeed())
 			Convey("Operation is successfully", func() {
 				So(err, ShouldBeNil)
-				So(keyExists(checkout.ProductsKey), ShouldBeTrue)
+				So(keyExists(lanabadger.ProductsKey), ShouldBeTrue)
 			})
 
 			Convey("DB is seeded", func() {
-				products, err := productManager.GetProducts()
+				products, err := productManager.GetAll()
 				So(err, ShouldBeNil)
 				So(len(products), ShouldEqual, 3)
 				exits, err := productManager.IsProductAvailable(checkout.PenCode)
@@ -46,7 +47,7 @@ func TestBadgerProductManager_SeedProducts(t *testing.T) {
 
 func TestBadgerProductManager_Get(t *testing.T) {
 	Convey("Given a populate product db", t, func() {
-		productManager := checkout.NewBadgerProductManager(db)
+		productManager := checkout.NewProductManager(db)
 		productManager.SeedProducts(checkout.GetProductSeed())
 
 		Convey("When we try to fetch an available product", func() {
@@ -62,9 +63,9 @@ func TestBadgerProductManager_Get(t *testing.T) {
 			unavailableProductCode := "BAD"
 			product, err := productManager.Get(unavailableProductCode)
 			Convey("Operation fails", func() {
-				So(err, ShouldNotBeNil)
+				So(err, ShouldBeError)
 				So(product, ShouldBeNil)
-				So(checkout.IsProductNotExistError(err), ShouldBeTrue)
+				So(err, ShouldBeError)
 			})
 		})
 	})

@@ -5,6 +5,7 @@ import (
 
 	"github.com/orov-io/BlackBart/server"
 	"github.com/orov-io/lbasket/packages/checkout"
+	"github.com/orov-io/lbasket/packages/lanabadger"
 	"github.com/orov-io/lbasket/service"
 )
 
@@ -51,6 +52,6 @@ func seedProducts() error {
 	if err != nil {
 		return err
 	}
-	productManager := checkout.NewBadgerProductManager(db)
+	productManager := checkout.NewProductManager(lanabadger.New(db))
 	return productManager.SeedProducts(checkout.GetProductSeed())
 }

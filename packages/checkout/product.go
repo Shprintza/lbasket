@@ -1,15 +1,5 @@
 package checkout
 
-import (
-	"encoding/json"
-	"fmt"
-
-	badger "github.com/dgraph-io/badger/v2"
-)
-
-// ProductsKey is the kew to store all available products
-const ProductsKey = "lanaProducts"
-
 // Available products
 const (
 	PenCode  = "PEN"
@@ -32,69 +22,42 @@ type Product struct {
 	Price int
 }
 
-// ProductManager is an interface that knows how to manages the
-// product entities livecycle.
+// ProductDB is an interface that knows how to CRUD product catalog on actual db.
 // This provide an abstraction level over the DB.
-type ProductManager interface {
-	SeedProducts(product *Product) error
+type ProductDB interface {
+	SeedProducts(products []*Product) error
 	GetProducts() ([]*Product, error)
-	IsProductAvailable(string) (bool, error)
-	Get(string) (*Product, error)
+	GetProduct(code string) (*Product, error)
+	IsProductNotExistError(err error) bool
 }
 
-// BadgerProductManager implements the ProductManager interface on top
+// ProductManager implements the ProductManager interface on top
 // on the badger DB. This allow us to be thread-safe without an external DB.
-type BadgerProductManager struct {
-	db *badger.DB
+type ProductManager struct {
+	db ProductDB
 }
 
-// NewBadgerProductManager return a BadgerProductManager  with the
+// NewProductManager return a ProductManager  with the
 // desired badger DB attached.
-func NewBadgerProductManager(db *badger.DB) *BadgerProductManager {
-	return &BadgerProductManager{
+func NewProductManager(db ProductDB) *ProductManager {
+	return &ProductManager{
 		db: db,
 	}
 }
 
 // SeedProducts fills the DB with available products
-func (m *BadgerProductManager) SeedProducts(products []*Product) error {
-	products2store, err := json.Marshal(products)
-	if err != nil {
-		return err
-	}
-	err = m.db.Update(func(txn *badger.Txn) error {
-		txn.Set(
-			[]byte(ProductsKey),
-			[]byte(products2store),
-		)
-		return nil
-	})
-
-	return err
+func (m *ProductManager) SeedProducts(products []*Product) error {
+	return m.db.SeedProducts(products)
 }
 
-// GetProducts fetches available products
-func (m *BadgerProductManager) GetProducts() ([]*Product, error) {
-	products := make([]*Product, 0)
-	err := m.db.View(func(txn *badger.Txn) error {
-		item, err := txn.Get([]byte(ProductsKey))
-		if err != nil {
-			return err
-		}
-
-		err = item.Value(func(val []byte) error {
-			err := json.Unmarshal(val, &products)
-			return err
-		})
-		return err
-	})
-
-	return products, err
+// GetAll fetches available products
+func (m *ProductManager) GetAll() ([]*Product, error) {
+	return m.db.GetProducts()
 }
 
 // IsProductAvailable checks if a product exist on DB by its code.
-func (m *BadgerProductManager) IsProductAvailable(code string) (bool, error) {
-	products, err := m.GetProducts()
+func (m *ProductManager) IsProductAvailable(code string) (bool, error) {
+	products, err := m.GetAll()
 	if err != nil {
 		return false, err
 	}
@@ -103,18 +66,14 @@ func (m *BadgerProductManager) IsProductAvailable(code string) (bool, error) {
 }
 
 // Get returns a product from database.
-func (m *BadgerProductManager) Get(code string) (*Product, error) {
-	products, err := m.GetProducts()
-	if err != nil {
-		return nil, err
-	}
+func (m *ProductManager) Get(code string) (*Product, error) {
+	return m.db.GetProduct(code)
+}
 
-	product := getProduct(code, products)
-	if product == nil {
-		return nil, NewProductNotExistError(code)
-	}
-
-	return product, nil
+// IsProductNotExistError is raised when yo try to fetch a product that is not
+// found in DB
+func (m *ProductManager) IsProductNotExistError(err error) bool {
+	return m.db.IsProductNotExistError(err)
 }
 
 // GetProductSeed returns the seed for the database.
@@ -149,36 +108,4 @@ func isProductIn(code string, products []*Product) bool {
 		}
 	}
 	return false
-}
-
-func getProduct(code string, products []*Product) *Product {
-	for _, product := range products {
-		if product.Code == code {
-			return product
-		}
-	}
-	return nil
-}
-
-// ProductNotExistError is used when we try to get a product that does
-// not exists in DB
-type ProductNotExistError struct {
-	ProductCode string
-}
-
-func (e *ProductNotExistError) Error() string {
-	return fmt.Sprintf("Product %v does not exists", e.ProductCode)
-}
-
-// NewProductNotExistError returns a new ProductNotExistErrorError error.
-func NewProductNotExistError(code string) error {
-	return &ProductNotExistError{
-		ProductCode: code,
-	}
-}
-
-// IsProductNotExistError checks if the error is a ProductNotExistError error.
-func IsProductNotExistError(err error) bool {
-	_, ok := err.(*ProductNotExistError)
-	return ok
 }
