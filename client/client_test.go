@@ -120,6 +120,28 @@ func TestGetBasket(t *testing.T) {
 	})
 }
 
+func TestDeleteBasket(t *testing.T) {
+	testData := getGetBasketTestData()
+	Convey("Given a basket that already exists", t, func() {
+		basket, _ := client.NewBasket()
+
+		for value, products := range testData {
+			Convey("When we delete it", func() {
+				err := client.DeleteBasket(basket.UUID)
+
+				Convey("Operation is done", func() {
+					So(err, ShouldBeNil)
+				})
+
+				Convey("We can retrieve it anymore", func() {
+					_, err := client.GetBasket(basket.UUID)
+					So(err, ShouldBeError)
+				})
+			})
+		}
+	})
+}
+
 func fillBasketWithProducts(basket string, products []string) {
 	for _, product := range products {
 		client.AddProductToBasket(product, basket)

@@ -20,19 +20,19 @@ _Lana basket_ uses [Long Ben](https://github.com/orov-io/lbasket) witch in turn 
     * [Service](./service) package has not unit test, but client test runs against the endpoint and code in this package, so running client test we can check the service package integrity.
     If the code was not a challenge, but a code for production, one could consider the suitability of these tests.
 
-* A long time ago, I learned not to repeat myself, so Im using my own framework on top on some strong utilities, as induced by the previous paragraph.
-Furthermore, for this project I have added to the framework the possibility of use an internal database (key/value), which I have not needed so far.
+* I usually use my own framework on top on some strong utilities, as induced in the first paragraph. This is done in order to achieve a DRY approach. But I know that this approach can take turns in coupling problems in a microservice mesh if we're not careful.
+Furthermore,for this project I have added to the framework the possibility of use an internal database (key/value), which I have not needed so far.
 
 * Given the probability of collision of a uuid, it is not checked that it already exists to avoid overwriting. If it is needed (see [uuid collisions](https://en.wikipedia.org/wiki/Universally_unique_identifier#Collisions) on wikipedia), please say it to me.
 
-* I use the JSON format to store baskets. I know that an approach with the encoding/base64 and encoding/gob will be better at a performance level, but JSON performance is enough for this toy example.
+* I use the JSON format to store baskets. I know that an approach with the encoding/base64 and encoding/gob will be better at a performance level, but JSON performance is enough for this toy example. Also, JSON presents a more familiar interface for many developers and we don't know who will touch this code in the future.
 
 * In order to have integrity, a list of available products is added and exposed on `GET $BASE_PATH/$SERVICE_VERSION/$SERVICE_BASE_PATH/products`. I know that it is not a requirement, but our users deserve an enjoyable experience. As is not a requirement to add new products to the list, only basic functionality is provided.
 
-* About the "Dealing with money as integers": Internally (the server) we deal with money as integer, as I I guess it's business logic.
+* About the "Dealing with money as integers": Internally (the server) we deal with money as integer, as I guess it's business logic.
 But keep on mind that we expose to the client a human readable representation of the money value. This is done so as not to expand such business logic to the client.
 
-* Discounts logic is in code. We are aware that the discounts could have been created in the database and applied dynamically; but given the scope of the challenge it is left in the code. In case we will want discounts living in DB, we will need to create a discountManager that deals with the logic.
+* Discounts logic is in code. We are aware that the discounts could have been created in the database and applied dynamically; but given the scope of the challenge it is left in the code. In case our product have a great impact on our customers and they demand more and more products with more discounts, We should consider that the discounts live in the database and are associated to the products dynamically.To do this, we will need to create a discountManager that deals with this logic.
 
 ## Quick start
 
