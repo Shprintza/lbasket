@@ -19,21 +19,11 @@ const (
 	productsEndpoint = "/products"
 )
 
-var service = os.Getenv(serviceKey)
-var port int
-
-func init() {
-	var err error
-	port, err = strconv.Atoi(os.Getenv(portKey))
-	if err != nil {
-		port = 8080
-	}
-}
+const defaultPort = 8080
 
 // Ping make a call to the is_alive endpoint.
 func Ping() (*models.Pong, error) {
-	client := api.MakeNewClient().WithDefaultBasePath().WithPort(port).
-		WithVersion(v1).ToService(service)
+	client := getClient()
 	resp, err := client.GET(pingEndpoint, nil)
 	if err != nil {
 		return nil, err
@@ -44,10 +34,19 @@ func Ping() (*models.Pong, error) {
 	return &pong, err
 }
 
+func getClient() *api.Client {
+	service := os.Getenv(serviceKey)
+	port, err := strconv.Atoi(os.Getenv(portKey))
+	if err != nil {
+		port = defaultPort
+	}
+	return api.MakeNewClient().WithDefaultBasePath().WithPort(port).
+		WithVersion(v1).ToService(service)
+}
+
 // NewBasket requests a new basket to the server.
 func NewBasket() (*models.Basket, error) {
-	client := api.MakeNewClient().WithDefaultBasePath().WithPort(port).
-		WithVersion(v1).ToService(service)
+	client := getClient()
 	resp, err := client.POST(basketEndpoint, nil)
 	if err != nil {
 		return nil, err
@@ -58,10 +57,9 @@ func NewBasket() (*models.Basket, error) {
 	return &basket, err
 }
 
-// GetAvailableProducts fetches a list of available products
+// GetAvailableProducts fetches a list of available products.
 func GetAvailableProducts() ([]*models.Product, error) {
-	client := api.MakeNewClient().WithDefaultBasePath().WithPort(port).
-		WithVersion(v1).ToService(service)
+	client := getClient()
 	resp, err := client.GET(productsEndpoint, nil)
 	if err != nil {
 		return nil, err
@@ -74,8 +72,7 @@ func GetAvailableProducts() ([]*models.Product, error) {
 
 // AddProductToBasket requests a new basket to the server.
 func AddProductToBasket(product, basket string) (*models.Basket, error) {
-	client := api.MakeNewClient().WithDefaultBasePath().WithPort(port).
-		WithVersion(v1).ToService(service)
+	client := getClient()
 	uri := getAddProductURI(product, basket)
 	resp, err := client.POST(uri, nil)
 	if err != nil {
@@ -85,20 +82,6 @@ func AddProductToBasket(product, basket string) (*models.Basket, error) {
 	err = response.ParseTo(resp, &NewBasket)
 
 	return &NewBasket, err
-}
-
-// GetBasket fetches a list of available products
-func GetBasket(basket string) (*models.Basket, error) {
-	client := api.MakeNewClient().WithDefaultBasePath().WithPort(port).
-		WithVersion(v1).ToService(service)
-	resp, err := client.GET(getGetBasketURI(basket), nil)
-	if err != nil {
-		return nil, err
-	}
-	fetchedBasket := new(models.Basket)
-	err = response.ParseTo(resp, &fetchedBasket)
-
-	return fetchedBasket, err
 }
 
 func getAddProductURI(product, basket string) string {
@@ -111,10 +94,41 @@ func getAddProductURI(product, basket string) string {
 	)
 }
 
+// GetBasket fetches a list of available products.
+func GetBasket(basket string) (*models.Basket, error) {
+	client := getClient()
+	resp, err := client.GET(getGetBasketURI(basket), nil)
+	if err != nil {
+		return nil, err
+	}
+	fetchedBasket := new(models.Basket)
+	err = response.ParseTo(resp, &fetchedBasket)
+
+	return fetchedBasket, err
+}
+
 func getGetBasketURI(basket string) string {
 	return fmt.Sprintf(
 		"%s/%s",
 		basketEndpoint,
 		basket,
 	)
+}
+
+// DeleteBasket deletes a basket in the server.
+func DeleteBasket(basket string) error {
+	client := getClient()
+	resp, err := client.DELETE(getGetBasketURI(basket), nil)
+	if err != nil {
+		return err
+	}
+	if !isOK(resp.StatusCode) {
+		return fmt.Errorf("Can't delete basket: %v", basket)
+	}
+
+	return nil
+}
+
+func isOK(code int) bool {
+	return code > 200 && code < 400
 }
