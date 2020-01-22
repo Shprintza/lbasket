@@ -155,6 +155,23 @@ func testPenDiscount(t *testing.T) {
 	})
 }
 
+func TestDeleteBasket(t *testing.T) {
+	Convey("Given a valid basket", t, func() {
+		basketManager := checkout.NewBasketManager(db)
+		basket, _ := basketManager.New()
+
+		Convey("When we deleted the basket", func() {
+			err := basketManager.Delete(basket.UUID)
+
+			Convey("We can't retrieve it anymore", func() {
+				So(err, ShouldBeNil)
+				_, err := basketManager.Get(basket.UUID)
+				So(err, ShouldBeError)
+			})
+		})
+	})
+}
+
 func isUUID(candidate string) bool {
 	_, error := uuid.Parse(candidate)
 	return error == nil

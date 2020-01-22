@@ -25,8 +25,7 @@ func (db *DB) SaveBasket(basket *checkout.Basket) error {
 	return err
 }
 
-// GetBasket try to retrieve a Basket from the badger DB. If basket not exists,
-// a not key found error is throwed.
+// GetBasket try to retrieve a Basket from the badger DB.
 func (db *DB) GetBasket(uuid string) (*checkout.Basket, error) {
 	basket := new(checkout.Basket)
 	err := db.View(func(txn *badger.Txn) error {
@@ -45,6 +44,14 @@ func (db *DB) GetBasket(uuid string) (*checkout.Basket, error) {
 	})
 
 	return basket, err
+}
+
+// DeleteBasket try to delete a basket from the badger DB.
+func (db *DB) DeleteBasket(uuid string) error {
+	err := db.Update(func(txn *badger.Txn) error {
+		return txn.Delete([]byte(uuid))
+	})
+	return err
 }
 
 // IsBaskedNotExistError is raised when yo try to fetch a basket that is not

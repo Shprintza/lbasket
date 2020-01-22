@@ -40,6 +40,7 @@ func addBasket(service *server.Service) {
 		basketGroup.GET("/:BasketUUID", getBasket)
 		basketGroup.POST("", newBasket)
 		basketGroup.POST("/:BasketUUID/products/:ProductCode", addProduct)
+		basketGroup.DELETE("/:BasketUUID", deleteBasket)
 	}
 }
 

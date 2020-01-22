@@ -88,6 +88,7 @@ func ceilDivisionBy2(amount int) int {
 type BasketDB interface {
 	SaveBasket(basket *Basket) error
 	GetBasket(uuid string) (*Basket, error)
+	DeleteBasket(uuid string) error
 	IsBaskedNotExistError(error) bool
 }
 
@@ -135,6 +136,11 @@ func (m *BasketManager) AddProductToBasket(
 	basket.push(product)
 	basket.calcTotal()
 	return basket, m.db.SaveBasket(basket)
+}
+
+// DeleteBasket deletes a basket from the database.
+func (m *BasketManager) Delete(uuid string) error {
+	return m.db.DeleteBasket(uuid)
 }
 
 // IsBaskedNotExistError is raised when yo try to fetch a basket that is not

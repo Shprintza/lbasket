@@ -131,7 +131,7 @@ func TestDeleteBasket(t *testing.T) {
 				So(err, ShouldBeNil)
 			})
 
-			Convey("We can retrieve it anymore", func() {
+			Convey("We can't retrieve it anymore", func() {
 				_, err := client.GetBasket(basket.UUID)
 				So(err, ShouldBeError)
 			})

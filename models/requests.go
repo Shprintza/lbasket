@@ -37,7 +37,7 @@ type AddProductRequest struct {
 	ProductCode string `uri:"ProductCode" binding:"required"`
 }
 
-// GetBasketRequest models a request to get a single basket
-type GetBasketRequest struct {
+// BasketRequests models a request to get or delete a single basket
+type BasketRequests struct {
 	BasketUUID string `uri:"BasketUUID" binding:"required,uuid"`
 }

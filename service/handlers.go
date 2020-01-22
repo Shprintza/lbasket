@@ -93,7 +93,7 @@ func addProduct(c *gin.Context) {
 }
 
 func getBasket(c *gin.Context) {
-	request := new(models.GetBasketRequest)
+	request := new(models.BasketRequests)
 	if err := c.ShouldBindUri(&request); err != nil {
 		response.SendBadRequest(c, err)
 		return
@@ -116,6 +116,29 @@ func getBasket(c *gin.Context) {
 	}
 
 	sendBasked(c, basket)
+}
+
+func deleteBasket(c *gin.Context) {
+	request := new(models.BasketRequests)
+	if err := c.ShouldBindUri(&request); err != nil {
+		response.SendBadRequest(c, err)
+		return
+	}
+
+	db, err := getLanaDB()
+	if err != nil {
+		response.SendInternalError(c, err)
+		return
+	}
+
+	basketManager := checkout.NewBasketManager(db)
+	err = basketManager.Delete(request.BasketUUID)
+	if err != nil {
+		response.SendInternalError(c, err)
+		return
+	}
+
+	sendDeleted(c)
 }
 
 func getLanaDB() (checkout.DB, error) {

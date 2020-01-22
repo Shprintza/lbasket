@@ -61,5 +61,9 @@ func parseProduct(product *checkout.Product) *models.Product {
 func iToEuro(value int) string {
 	integer := value / decimalDiv
 	decimals := value % decimalDiv
-	return fmt.Sprintf("%v.%v€", integer, decimals)
+	return fmt.Sprintf("%v.%02d€", integer, decimals)
+}
+
+func sendDeleted(c *gin.Context) {
+	response.SendNoContent(c)
 }
