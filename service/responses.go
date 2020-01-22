@@ -9,12 +9,17 @@ import (
 	"github.com/orov-io/lbasket/packages/checkout"
 )
 
+const (
+	empty      = 0
+	decimalDiv = 100
+)
+
 func sendPong(c *gin.Context, pong models.Pong) {
 	response.SendOK(c, pong)
 }
 
 func sendBasked(c *gin.Context, basket *checkout.Basket) {
-	items2send := make([]*models.BasketItem, 0)
+	items2send := make([]*models.BasketItem, empty)
 	basket2send := new(models.Basket)
 	basket2send.Items = items2send
 	basket2send.UUID = basket.UUID
@@ -37,7 +42,7 @@ func parseItem(item *checkout.BasketItem) *models.BasketItem {
 }
 
 func parseProducts(products []*checkout.Product) []*models.Product {
-	parsedProducts := make([]*models.Product, 0)
+	parsedProducts := make([]*models.Product, empty)
 	for _, product := range products {
 		parsedProducts = append(parsedProducts, parseProduct(product))
 	}
@@ -54,7 +59,7 @@ func parseProduct(product *checkout.Product) *models.Product {
 }
 
 func iToEuro(value int) string {
-	integer := value / 100
-	decimals := value % 100
+	integer := value / decimalDiv
+	decimals := value % decimalDiv
 	return fmt.Sprintf("%v.%v€", integer, decimals)
 }
