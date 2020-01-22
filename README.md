@@ -6,6 +6,20 @@ _Lana basket_ uses [Long Ben](https://github.com/orov-io/lbasket) witch in turn 
 
 ## Considerations
 
+* About testing:
+
+  * Done for this challenge
+    * Unit testing for [checkout](./packages/checkout/) package.
+    * Unit testing for [client](./client) package.
+    * Functional testing is provided in a indirect way by client packages.
+
+  * Not implemented
+    * Unit testing for [lanabadger](./packages/lanabadger/) is straightforward, so is not added.
+  
+  * Implemented but not shown in coverage tools
+    * [Service](./service) package has not unit test, but client test runs against the endpoint and code in this package, so running client test we can check the service package integrity.
+    If the code was not a challenge, but a code for production, one could consider the suitability of these tests.
+
 * A long time ago, I learned not to repeat myself, so Im using my own framework on top on some strong utilities, as induced by the previous paragraph.
 Furthermore, for this project I have added to the framework the possibility of use an internal database (key/value), which I have not needed so far.
 
