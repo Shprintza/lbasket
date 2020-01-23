@@ -6,12 +6,15 @@ _Lana basket_ uses [Long Ben](https://github.com/orov-io/lbasket) witch in turn 
 
 ## Considerations
 
+* Please, read entire README.md in order to know how to run this service. If you have any question or trouble, please, contact me at hi@orov.io
+
 * About testing:
 
   * Done for this challenge
     * Unit testing for [checkout](./packages/checkout/) package.
     * Unit testing for [client](./client) package.
     * Functional testing is provided in a indirect way by client packages.
+    * Behavioral testing for new and get endpoints. As the logic is the same as the client tests, we only provide some test as a demonstration.
 
   * Not implemented
     * Unit testing for [lanabadger](./packages/lanabadger/) is straightforward, so is not added.
@@ -34,11 +37,22 @@ But keep on mind that we expose to the client a human readable representation of
 
 * Discounts logic is in code. We are aware that the discounts could have been created in the database and applied dynamically; but given the scope of the challenge it is left in the code. In case our product have a great impact on our customers and they demand more and more products with more discounts, We should consider that the discounts live in the database and are associated to the products dynamically.To do this, we will need to create a discountManager that deals with this logic.
 
+* As it is possible to add an external DB in the future, project is ready to add a __postgres__ DB. _[docker-compose](./docker-compose.yaml)_ file adds a postgres container to provide local development if necessary.
+
+* About thread-safety, we use the [badger](https://github.com/dgraph-io/badger) package as internal db, which provides thread-safety by default. This could also have been achieved by applying __[mutexes](https://gobyexample.com/mutexes)__ on top of a `map[string]interface{}` map.
+However, given the reputation of the above-mentioned package, this option is chosen as it is the most tested.
+
 ## Quick start
 
 Provide a _.env_ file variables with all variables founds in _[example.env](./example.env)_. Load this _.env_ file to your environment variables.
 
-Assert that port $PORT is available and run below command:
+Be sure that you have all dependencies by running:
+
+```bash
+go mod tidy
+```
+
+Run the server with below command:
 
 ```Bash
 make up logs
@@ -55,25 +69,11 @@ curl --request GET \
 > {"status":"OK","message":"pong"}
 ```
 
-## Making your own service
+You can shutdown the service with:
 
-As _Long Ben_ is near to be an out-the-box service, you will need to change some variables.
-
-Some imports on _[main.go](./main.go)_, _[responses.go](./service/responses.go)_, _[handlers.go](./service/handlers.go)_, _[Dockerfile](./Dockerfile)_,  _[client.go](./client/client.go)_ and _[client_test.go](./client/client_test)_ has hardcoded references to lbasket module. Please, change this import sentences in order to make your own service.
-
-Also, you will need to change the module name in the _[go.mod](./go.mod)_ file.
-
-### Where to place my files
-
-Service related go files should be organizing as below:
-
-* Handlers functions => _[handlers.go](./service/handlers.go)_
-* Gin routes and groups => _[routes.go](./service/routes.go)_
-* Responses functions => _[responses.go](./service/responses.go)_
-* Packages providing functionality: _[packages](./packages/README.md)_
-* Database migrations => _[migrations](./migrations/README.md)_
-* Request and response structs => _[models](./models)_
-* Service go client => _[client.go](./client/client.go)_. This is also a good please to provide end-to-end tests, as you can see at _[client_test.go](./client/client_test.go)_.
+```bash
+make down
+```
 
 ## Dependencies
 
@@ -83,6 +83,11 @@ As internal dependencies, this module relies in some internal dependencies:
 * [BlackBart](https://github.com/orov-io/BlackBart), the server utility.
 
 Also, the intensive use of go modules force us to need go1.13.
+
+For testing, we use below libraries:
+
+* [godog](https://github.com/DATA-DOG/godog) for cucumber based behavioral testing.
+* [Convey](https://github.com/smartystreets/goconvey/convey) for unit and functional testing.
 
 ## ENV VARIABLES
 
@@ -110,17 +115,37 @@ These variables are used in  built time and are only needed on docker build time
 Please, see documentation of the [BlackBart](https://github.com/orov-io/BlackBart) to find variables that enables your server capabilities.
 
 * PORT (only local)
+* ENV (set it to local)
 * DATABASE_HOST
 * DATABASE_PASSWORD
 * DATABASE_USER
 * DATABASE_SSL_MODE
 * SERVICE_DATABASE_NAME
 * DATABASE_MIGRATIONS_DIR
-* GOOGLE_APPLICATION_CREDENTIALS
-* GCLOUD_STORAGE_BUCKET
-* FIREBASE_BUCKET
-* FIREBASE_BUCKET_FILE_NAME
 * SERVICE_NAME
 * SERVICE_VERSION
-* REDIS_ADDRESS
-* REDIS_PASSWORD
+* GOPRIVATE (set it to: github.com/orov-io/*)
+* BASE_PATH (set it to: http://localhost )
+* SERVICE_DESCRIPTION ( optional )
+* SERVICE_VERSION (set it to v1)
+* SERVICE_BASE_PATH
+* ENABLE_BADGER
+
+Database env variables only need to be provided if you are using a POSTGRES database; and, for now, this is not the circumstance.
+
+As the _[example.env](./example.env)_ is provided, you can simply copy it to __.env__ before run the project and then execute:
+
+```bash
+source .env
+```
+
+## Running tests
+
+Please, be sure that test file has access to your env variables (i.e.: vscode do not do this for you in lot of cases).
+
+To run cucumber test you must first install the [godog](https://github.com/DATA-DOG/godog) binary file:
+
+```bash
+go get github.com/DATA-DOG/godog/cmd/godog
+```
+
