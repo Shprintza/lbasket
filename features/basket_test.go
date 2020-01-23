@@ -12,6 +12,7 @@ import (
 const zeroValue = "0.00€"
 
 var basket *models.Basket
+var gettedBasket *models.Basket
 var stepError error
 var invalidBasketUUID string
 
@@ -45,7 +46,7 @@ func iShouldReceiveANewEmptyBasket() error {
 	return nil
 }
 
-func iHaveAnInvalidbasket() error {
+func iHaveAnInvalidBasket() error {
 	invalidBasketUUID = uuid.New().String()
 	return nil
 }
@@ -62,14 +63,47 @@ func iShouldReceiveAnError() error {
 	return nil
 }
 
+func iHaveAValidBasket() error {
+	var err error
+	basket, err = client.NewBasket()
+	return err
+}
+
+func iCallToGetTheValidBasket() error {
+	gettedBasket, stepError = client.GetBasket(basket.UUID)
+	return nil
+}
+
+func iShouldReceiveDesiredBasket() error {
+	if stepError != nil {
+		return fmt.Errorf("Bad response with error: %v", stepError)
+	}
+
+	if !areSameBaskets(basket, gettedBasket) {
+		return fmt.Errorf("Basket fetched unsuccessfully")
+	}
+
+	return nil
+}
+
+func areSameBaskets(original, copied *models.Basket) bool {
+	return original.UUID == copied.UUID &&
+		len(original.Items) == len(copied.Items) &&
+		original.Total == copied.Total
+}
+
 func FeatureContext(s *godog.Suite) {
 	s.Step(`^I have a new basket request$`, iHaveANewBasketRequest)
 	s.Step(`^I receive the response$`, iReceiveTheResponse)
 	s.Step(`^I should receive a new empty basket$`, iShouldReceiveANewEmptyBasket)
 
-	s.Step(`^I have an invalid basket$`, iHaveAnInvalidbasket)
+	s.Step(`^I have an invalid basket$`, iHaveAnInvalidBasket)
 	s.Step(`^I try to retrive the invalid basket$`, iCallToGetInvalidBasket)
-	s.Step(`^I shoud receive a error message$`, iShouldReceiveAnError)
+	s.Step(`^I should receive a error message$`, iShouldReceiveAnError)
+
+	s.Step(`^I have a valid basket$`, iHaveAValidBasket)
+	s.Step(`^I try to retrive the basket$`, iCallToGetTheValidBasket)
+	s.Step(`^I should receive desired basket$`, iShouldReceiveDesiredBasket)
 
 	s.BeforeSuite(func() {
 		upServer()
