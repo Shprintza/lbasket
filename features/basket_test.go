@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/DATA-DOG/godog"
-	"github.com/DATA-DOG/godog/gherkin"
 	"github.com/google/uuid"
 	"github.com/orov-io/lbasket/client"
 	"github.com/orov-io/lbasket/models"
@@ -13,15 +12,16 @@ import (
 const zeroValue = "0.00€"
 
 var basket *models.Basket
-var newBasketError error
+var stepError error
+var invalidBasketUUID string
 
 func iHaveANewBasketRequest() error {
-	basket, newBasketError = client.NewBasket()
+	basket, stepError = client.NewBasket()
 	return nil
 }
 
 func iReceiveTheResponse() error {
-	if newBasketError != nil || basket == nil {
+	if stepError != nil || basket == nil {
 		return fmt.Errorf("Unable to retrieve a new basket")
 	}
 
@@ -45,16 +45,37 @@ func iShouldReceiveANewEmptyBasket() error {
 	return nil
 }
 
+func iHaveAnInvalidbasket() error {
+	invalidBasketUUID = uuid.New().String()
+	return nil
+}
+
+func iCallToGetInvalidBasket() error {
+	_, stepError = client.GetBasket(invalidBasketUUID)
+	return nil
+}
+
+func iShouldReceiveAnError() error {
+	if stepError == nil {
+		return fmt.Errorf("Basket exists")
+	}
+	return nil
+}
+
 func FeatureContext(s *godog.Suite) {
 	s.Step(`^I have a new basket request$`, iHaveANewBasketRequest)
 	s.Step(`^I receive the response$`, iReceiveTheResponse)
 	s.Step(`^I should receive a new empty basket$`, iShouldReceiveANewEmptyBasket)
 
-	s.BeforeFeature(func(*gherkin.Feature) {
+	s.Step(`^I have an invalid basket$`, iHaveAnInvalidbasket)
+	s.Step(`^I try to retrive the invalid basket$`, iCallToGetInvalidBasket)
+	s.Step(`^I shoud receive a error message$`, iShouldReceiveAnError)
+
+	s.BeforeSuite(func() {
 		upServer()
 	})
 
-	s.AfterFeature(func(*gherkin.Feature) {
+	s.AfterSuite(func() {
 		downServer()
 	})
 }
