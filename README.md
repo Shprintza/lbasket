@@ -21,12 +21,11 @@ _Lana basket_ uses [Long Ben](https://github.com/orov-io/lbasket) witch in turn 
   
   * Implemented but not shown in coverage tools
     * [Service](./service) package has not unit test, but client test runs against the endpoint and code in this package, so running client test we can check the service package integrity.
-    If the code was not a challenge, but a code for production, one could consider the suitability of these tests.
 
 * I usually use my own framework on top on some strong utilities, as induced in the first paragraph. This is done in order to achieve a DRY approach. But I know that this approach can take turns in coupling problems in a microservice mesh if we're not careful.
 Furthermore,for this project I have added to the framework the possibility of use an internal database (key/value), which I have not needed so far.
 
-* Given the probability of collision of a uuid, it is not checked that it already exists to avoid overwriting. If it is needed (see [uuid collisions](https://en.wikipedia.org/wiki/Universally_unique_identifier#Collisions) on wikipedia), please say it to me.
+* Given the probability of collision of uuids (see [uuid collisions](https://en.wikipedia.org/wiki/Universally_unique_identifier#Collisions) on wikipedia), it is not checked that it already exists to avoid overwriting.
 
 * I use the JSON format to store baskets. I know that an approach with the encoding/base64 and encoding/gob will be better at a performance level, but JSON performance is enough for this toy example. Also, JSON presents a more familiar interface for many developers and we don't know who will touch this code in the future.
 
@@ -149,3 +148,6 @@ To run cucumber test you must first install the [godog](https://github.com/DATA-
 go get github.com/DATA-DOG/godog/cmd/godog
 ```
 
+## About the API
+
+You can find the API specification on the *[open-api_example](open-api_example.yaml)* file.

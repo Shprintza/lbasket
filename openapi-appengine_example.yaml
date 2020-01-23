@@ -1,8 +1,8 @@
 swagger: "2.0"
 info:
-  title: "Long Ben Go Backbone"
-  description: "A backbone to Go services"
-  version: "0.0.1"
+  title: "Lana checkout service"
+  description: "A simple checkout service to buy lana merchandising"
+  version: "1.0.0"
 host: "${SERVICE_NAME}-dot-${GCLOUD_PROJECT}.appspot.com"
 basePath: ${SERVICE_VERSION}/${SERVICE_BASE_PATH}
 schemes:
@@ -36,12 +36,103 @@ paths:
           schema:
             type: object
             properties:
-              status:
-                $ref: "#/definitions/status"
-              message:
-                type: string
               data:
                 $ref: "#/definitions/pong"
+
+  /basket:
+    post:
+      description: "Create new basket"
+      operationId: "newBasket"
+      responses:
+        200:
+          description: "Created basket"
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: "#/definitions/basket"
+
+  /baskets/{basket}:
+    get:
+      description: "Get desired basket"
+      operationId: "getBasket"
+      parameters:
+        - name: basket
+          in: path
+          description: Requested basket
+          type: string
+          format: uuid
+          required: true
+      responses:
+        200:
+          description: "Basket fetched"
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: "#/definitions/basket"
+        400:
+          $ref: '#/responses/NotFound'
+        
+    delete:
+      description: "Delete desired basket"
+      operationId: "deleteBasket"
+      parameters:
+        - name: basket
+          in: path
+          description: Requested basket
+          type: string
+          format: uuid
+          required: true
+      responses:
+        204:
+          description: "Created basket"
+  
+  /baskets/{basket}/products/{product}:
+    post:
+      description: "Add product to basket"
+      operationId: "addProduct"
+      parameters:
+        - name: basket
+          in: path
+          description: Basket uuid
+          type: string
+          format: uuid
+          required: true
+        - name: product
+          in: path
+          description: Product code
+          type: string
+          required: true
+      responses:
+        200:
+          description: "Updated basket"
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: "#/definitions/basket"
+        400:
+          $ref: '#/responses/NotFound'
+        404:
+          $ref: '#/responses/BadRequest' 
+  /products:
+    get:
+      description: "Get product catalog"
+      operationId: "getProducts"
+      responses:
+        200:
+          description: "Product catalog"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/products"  
+        400:
+          $ref: '#/responses/NotFound'
+        404:
+          $ref: '#/responses/BadRequest' 
+    
+            
 
 definitions:
   status:
@@ -57,6 +148,41 @@ definitions:
         $ref: "#/definitions/status"
       message:
         type: string
+
+  basket:
+    type: object
+    properties:
+      uuid: 
+        type: string
+        format: uuid
+      items:
+        type: array
+        items:
+          $ref: "#/definitions/products"
+      total:
+        $ref: "#/definitions/euro"
+  
+  products:
+    type: object
+    properties:
+      product:
+        $ref: "#/definitions/product"
+      amount:
+        $ref: "#/definitions/euro"
+  
+  product:
+    type: object
+    properties:
+      code:
+        type: string
+      name:
+        type: string
+      price:
+        $ref: "#/definitions/euro"
+
+  euro:
+    type: string
+    pattern: '^\d+\.\d{2}€$'   
 
   errorPayload:
     type: object
