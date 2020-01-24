@@ -41,6 +41,8 @@ But keep on mind that we expose to the client a human readable representation of
 * About thread-safety, we use the [badger](https://github.com/dgraph-io/badger) package as internal db, which provides thread-safety by default. This could also have been achieved by applying __[mutexes](https://gobyexample.com/mutexes)__ on top of a `map[string]interface{}` map.
 However, given the reputation of the above-mentioned package, this option is chosen as it is the most tested.
 
+* As at this time we have no way to alter the product definition and baskets are volatiles (we destroy baskets with service), basket is fetched as is saved (with same product values). As prevention, we only recalculate the total amount of the basket. If we provide functionality to alter products, we need to keep on mind to add logic to fix this issue. 
+
 ## Quick start
 
 Provide a _.env_ file variables with all variables founds in _[example.env](./example.env)_. Load this _.env_ file to your environment variables.
