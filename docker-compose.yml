@@ -23,7 +23,7 @@ services:
       - ./:/$SERVICE_NAME
       - $HOME/go/src:/go/src
       - $HOME/go/pkg:/go/pkg
-      - $HOME/.netrc:/root/.netrc
+      # - $HOME/.netrc:/root/.netrc
       # - $HOME/Downloads/gcr-pull.json:/root/key.json
     environment:
       - PORT
