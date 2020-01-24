@@ -179,8 +179,8 @@ github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd/go.mod h1:6dJ
 github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742/go.mod h1:bx2lNnkwVCuqBIxFjflWJWanXIb3RllmbCylyMrvgv0=
 github.com/modern-go/reflect2 v1.0.1 h1:9f412s+6RmYXLWZSEzVVgPGK7C2PphHj5RJrvfx9AWI=
 github.com/modern-go/reflect2 v1.0.1/go.mod h1:bx2lNnkwVCuqBIxFjflWJWanXIb3RllmbCylyMrvgv0=
-github.com/orov-io/BlackBart v0.0.6 h1:YCw8cF3ew1t90XJlm9NiFtd9Oa+/+WNBGuzp6i+sTxE=
-github.com/orov-io/BlackBart v0.0.6/go.mod h1:tGfTP35Z2KCdZnnPotYwuQ37U8n59MVAqokrZ6Pltj4=
+github.com/orov-io/BlackBart v0.0.7 h1:Lno4lO/EihZESZ3UENZEfJKp0T02+sKoAH6PpD2UeZk=
+github.com/orov-io/BlackBart v0.0.7/go.mod h1:tGfTP35Z2KCdZnnPotYwuQ37U8n59MVAqokrZ6Pltj4=
 github.com/orov-io/BlackBeard v0.0.1 h1:HT3jQ1ok40nHmNQ+uSpQFagbL0kSYKoJHSTX29AomEA=
 github.com/orov-io/BlackBeard v0.0.1/go.mod h1:/z+dYHTygoIyH2PWrVw3pXZn9W8WfzUb9u5alTqZczE=
 github.com/pelletier/go-toml v1.2.0/go.mod h1:5z9KED0ma1S8pY6P1sdut58dfprrGBbd/94hg7ilaic=
