@@ -20,7 +20,7 @@ WORKDIR ${workdir}
 
 # Install git.
 ## Git is required for fetching dependencies.
-RUN apk update && apk add --no-cache git openssh-client
+RUN apk update && apk add --no-cache git openssh-client build-base
 
 ## This line adds gomod access to private repositories
 COPY ${netrcFile} /root/.netrc

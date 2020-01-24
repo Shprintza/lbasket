@@ -17,8 +17,8 @@ definitions:
           - gcloud auth activate-service-account --key-file gcloud-api-key.json
           - gcloud config set project $GCLOUD_PROJECT 
           - apk add gettext
-          - envsubst < openapi-appengine.example.yaml >> openapi-appengine.yaml
-          - envsubst < app.example.yaml >> app.yaml
+          - envsubst < openapi-appengine.tpl.yaml >> openapi-appengine.yaml
+          - envsubst < app.tpl.yaml >> app.yaml
           - echo $NETRC | base64 -d > ./.netrc
           - gcloud -q endpoints services deploy openapi-appengine.yaml
           - gcloud -q app deploy app.yaml

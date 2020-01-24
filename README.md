@@ -151,3 +151,47 @@ go get github.com/DATA-DOG/godog/cmd/godog
 ## About the API
 
 You can find the API specification on the *[open-api_example](open-api_example.yaml)* file.
+
+Also, a lived API explored can be find at `https://endpointsportal.lana-challenge.cloud.goog/`
+
+## Deploying service
+
+This service is ready to be deployed to a gcloud appengine environment. To do this, you will need access to a gcloud project and enough credentials.
+
+### Locally
+
+Please, be sure that `envsubs`is installed and reachable by your local system. Also be sure that below env variables are sets (defaults is provided on _[example.env](./example.env)_):
+
+* GCLOUD_PROJECT (set to gcloud project)
+* SERVICE_VERSION
+* SERVICE_BASE_PATH
+* ENV
+* SERVICE_NAME (optional)
+* ENABLE_BADGER 
+
+Also you need to provide a _.netrc_ file on the root of the project (ignored by git in this repo) with a credential to access to private repositories. This file should looks like:
+
+```.netrc
+machine bitbucket.org
+	login myBBuser
+	password myBBpass
+
+machine github.com
+	login myGHuser
+	password myGHpass
+
+```
+
+To deploy the service, you need :
+
+```bash
+envsubst < app.tpl.yaml >> app.yaml
+gcloud app deploy app.yaml
+```
+
+If you add or update any endpoint, please, update the `gcloud endpoints` gateway by update the _[openapi-appengine.tpl.yaml](./openapi-appengine.tpl.yaml)_ template and executing:
+
+```bash
+envsubst < openapi-appengine.tpl.yaml >> openapi-appengine.yaml
+gcloud endpoints services deploy openapi-appengine.yaml
+```

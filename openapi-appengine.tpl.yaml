@@ -3,8 +3,8 @@ info:
   title: "Lana checkout service"
   description: "A simple checkout service to buy lana merchandising"
   version: "1.0.0"
-host: "${SERVICE_NAME}-dot-${GCLOUD_PROJECT}.appspot.com"
-basePath: ${SERVICE_VERSION}/${SERVICE_BASE_PATH}
+host: "${GCLOUD_PROJECT}.appspot.com"
+basePath: /${SERVICE_VERSION}/${SERVICE_BASE_PATH}
 schemes:
   - "https"
 consumes:
@@ -39,7 +39,7 @@ paths:
               data:
                 $ref: "#/definitions/pong"
 
-  /basket:
+  /baskets:
     post:
       description: "Create new basket"
       operationId: "newBasket"

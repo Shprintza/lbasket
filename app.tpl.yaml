@@ -1,6 +1,6 @@
 runtime: custom
 env: flex
-service: ${SERVICE_NAME}
+service: default
 
 manual_scaling:
   instances: 1
@@ -17,7 +17,7 @@ handlers:
   script: _go_app
 
 endpoints_api_service:
-  name: "${SERVICE_NAME}-dot-${GCLOUD_PROJECT}.appspot.com"
+  name: "${GCLOUD_PROJECT_ID}.appspot.com"
   rollout_strategy: managed
 
 env_variables:
@@ -33,6 +33,7 @@ env_variables:
   SERVICE_NAME : ${SERVICE_NAME}
   SERVICE_VERSION: ${SERVICE_VERSION}
   SERVICE_BASE_PATH: ${SERVICE_BASE_PATH}
+  ENABLE_BADGER: ${ENABLE_BADGER}
 
 # beta_settings:
 #   cloud_sql_instances: ${INSTANCE_CONNECTION_NAME}
