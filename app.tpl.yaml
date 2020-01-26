@@ -17,7 +17,7 @@ handlers:
   script: _go_app
 
 endpoints_api_service:
-  name: "${GCLOUD_PROJECT_ID}.appspot.com"
+  name: "${GCLOUD_PROJECT}.appspot.com"
   rollout_strategy: managed
 
 env_variables:

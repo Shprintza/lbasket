@@ -43,6 +43,8 @@ paths:
     post:
       description: "Create new basket"
       operationId: "newBasket"
+      security:
+        - api_key: []
       responses:
         200:
           description: "Created basket"
@@ -56,6 +58,8 @@ paths:
     get:
       description: "Get desired basket"
       operationId: "getBasket"
+      security:
+        - api_key: []
       parameters:
         - name: basket
           in: path
@@ -77,6 +81,8 @@ paths:
     delete:
       description: "Delete desired basket"
       operationId: "deleteBasket"
+      security:
+        - api_key: []
       parameters:
         - name: basket
           in: path
@@ -92,6 +98,8 @@ paths:
     post:
       description: "Add product to basket"
       operationId: "addProduct"
+      security:
+        - api_key: []
       parameters:
         - name: basket
           in: path
@@ -120,6 +128,8 @@ paths:
     get:
       description: "Get product catalog"
       operationId: "getProducts"
+      security:
+        - api_key: []
       responses:
         200:
           description: "Product catalog"

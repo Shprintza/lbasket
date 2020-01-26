@@ -134,6 +134,12 @@ Please, see documentation of the [BlackBart](https://github.com/orov-io/BlackBar
 
 Database env variables only need to be provided if you are using a POSTGRES database; and, for now, this is not the circumstance.
 
+Also, you wil need next variables for client functionality:
+
+* CLIENT_LBASKET_SERVER_HOST
+* CLIENT_LBASKET_SERVER_PORT
+* CLIENT_LBASKET_APIKEY (only needed for live versions)
+
 As the _[example.env](./example.env)_ is provided, you can simply copy it to __.env__ before run the project and then execute:
 
 ```bash
@@ -157,6 +163,8 @@ You can find the API specification on the *[open-api_example](open-api_example.y
 Also, a lived API explored can be find at `https://endpointsportal.lana-challenge.cloud.goog/`
 
 ## Deploying service
+
+At this time, service is accessible trough `lana.orov.io`. See the api documentation in [open-api](openapi-appengine.tpl.yaml) to know available paths. Living service requires an API key for all functional endpoints get. Only ping endpoint is not api key protected. Lana API key is: `AIzaSyBbgPu1UHNWGsbLF2IhjlgWKJGWM7xWBJ0`
 
 This service is ready to be deployed to a gcloud appengine environment. To do this, you will need access to a gcloud project and enough credentials.
 
@@ -187,13 +195,15 @@ machine github.com
 To deploy the service, you need :
 
 ```bash
-envsubst < app.tpl.yaml >> app.yaml
+envsubst < app.tpl.yaml > app.yaml
 gcloud app deploy app.yaml
 ```
+
+Be aware about the ENV variable in resulting app.yaml file.
 
 If you add or update any endpoint, please, update the `gcloud endpoints` gateway by update the _[openapi-appengine.tpl.yaml](./openapi-appengine.tpl.yaml)_ template and executing:
 
 ```bash
-envsubst < openapi-appengine.tpl.yaml >> openapi-appengine.yaml
+envsubst < openapi-appengine.tpl.yaml > openapi-appengine.yaml
 gcloud endpoints services deploy openapi-appengine.yaml
 ```
