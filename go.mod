@@ -12,7 +12,7 @@ require (
 	github.com/json-iterator/go v1.1.8 // indirect
 	github.com/leodido/go-urn v1.2.0 // indirect
 	github.com/orov-io/BlackBart v0.0.7
-	github.com/orov-io/BlackBeard v0.0.1
+	github.com/orov-io/BlackBeard v0.0.4
 	github.com/smartystreets/goconvey v1.6.4
 	gopkg.in/go-playground/validator.v9 v9.30.0 // indirect
 )

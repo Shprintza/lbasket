@@ -24,7 +24,8 @@ var stepError error
 var invalidBasketUUID string
 
 func iHaveANewBasketRequest() error {
-	basket, stepError = client.NewBasket()
+	lanaBasket := client.NewWithDefaults()
+	basket, stepError = lanaBasket.NewBasket()
 	return nil
 }
 
@@ -59,7 +60,7 @@ func iHaveAnInvalidBasket() error {
 }
 
 func iCallToGetInvalidBasket() error {
-	_, stepError = client.GetBasket(invalidBasketUUID)
+	_, stepError = client.NewWithDefaults().GetBasket(invalidBasketUUID)
 	return nil
 }
 
@@ -72,12 +73,12 @@ func iShouldReceiveAnError() error {
 
 func iHaveAValidBasket() error {
 	var err error
-	basket, err = client.NewBasket()
+	basket, err = client.NewWithDefaults().NewBasket()
 	return err
 }
 
 func iCallToGetTheValidBasket() error {
-	gettedBasket, stepError = client.GetBasket(basket.UUID)
+	gettedBasket, stepError = client.NewWithDefaults().GetBasket(basket.UUID)
 	return nil
 }
 

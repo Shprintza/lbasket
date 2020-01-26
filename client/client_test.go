@@ -34,9 +34,10 @@ const (
 
 func TestPing(t *testing.T) {
 	Convey(givenAClient, t, func() {
+		lanaClient := client.NewWithDefaults()
 
 		Convey(callHandlerByService, func() {
-			pong, err := client.Ping()
+			pong, err := lanaClient.Ping()
 			Convey(responseShouldBeOK, func() {
 
 				So(err, ShouldBeNil)
@@ -48,9 +49,10 @@ func TestPing(t *testing.T) {
 
 func TestNewBasket(t *testing.T) {
 	Convey(givenAClient, t, func() {
+		lanaClient := client.NewWithDefaults()
 
 		Convey(newBasketCall, func() {
-			newBasket, err := client.NewBasket()
+			newBasket, err := lanaClient.NewBasket()
 			Convey(responseShouldBeOK, func() {
 
 				So(err, ShouldBeNil)
@@ -67,9 +69,10 @@ func isUUID(candidate string) bool {
 
 func TestGetProducts(t *testing.T) {
 	Convey(givenAClient, t, func() {
+		lanaClient := client.NewWithDefaults()
 
 		Convey(tryToGetAListOfProducts, func() {
-			products, err := client.GetAvailableProducts()
+			products, err := lanaClient.GetAvailableProducts()
 			Convey(availableProductsAreReturned, func() {
 
 				So(err, ShouldBeNil)
@@ -81,10 +84,11 @@ func TestGetProducts(t *testing.T) {
 
 func TestAddProduct(t *testing.T) {
 	Convey(givenAEmptyBasket, t, func() {
-		newBasket, _ := client.NewBasket()
-		products, _ := client.GetAvailableProducts()
+		lanaClient := client.NewWithDefaults()
+		newBasket, _ := lanaClient.NewBasket()
+		products, _ := lanaClient.GetAvailableProducts()
 		product := products[0].Code
-		updatedBasket, err := client.AddProductToBasket(
+		updatedBasket, err := lanaClient.AddProductToBasket(
 			product,
 			newBasket.UUID,
 		)
@@ -103,14 +107,15 @@ func TestAddProduct(t *testing.T) {
 func TestGetBasket(t *testing.T) {
 	testData := getGetBasketTestData()
 	Convey(givenAEmptyBasket, t, func() {
-		basket, _ := client.NewBasket()
+		lanaClient := client.NewWithDefaults()
+		basket, _ := lanaClient.NewBasket()
 
 		for value, products := range testData {
 			Convey(fmt.Sprintf("When we fill it with %s", products), func() {
 				fillBasketWithProducts(basket.UUID, products)
 
 				Convey("Total amount is correct", func() {
-					updatedBasket, err := client.GetBasket(basket.UUID)
+					updatedBasket, err := lanaClient.GetBasket(basket.UUID)
 					So(err, ShouldBeNil)
 					So(updatedBasket.UUID, ShouldEqual, basket.UUID)
 					So(updatedBasket.Total, ShouldEqual, value)
@@ -122,17 +127,18 @@ func TestGetBasket(t *testing.T) {
 
 func TestDeleteBasket(t *testing.T) {
 	Convey("Given a basket that already exists", t, func() {
-		basket, _ := client.NewBasket()
+		lanaClient := client.NewWithDefaults()
+		basket, _ := lanaClient.NewBasket()
 
 		Convey("When we delete it", func() {
-			err := client.DeleteBasket(basket.UUID)
+			err := lanaClient.DeleteBasket(basket.UUID)
 
 			Convey("Operation is done", func() {
 				So(err, ShouldBeNil)
 			})
 
 			Convey("We can't retrieve it anymore", func() {
-				_, err := client.GetBasket(basket.UUID)
+				_, err := lanaClient.GetBasket(basket.UUID)
 				So(err, ShouldBeError)
 			})
 		})
@@ -140,8 +146,9 @@ func TestDeleteBasket(t *testing.T) {
 }
 
 func fillBasketWithProducts(basket string, products []string) {
+	lanaClient := client.NewWithDefaults()
 	for _, product := range products {
-		client.AddProductToBasket(product, basket)
+		lanaClient.AddProductToBasket(product, basket)
 	}
 
 }
