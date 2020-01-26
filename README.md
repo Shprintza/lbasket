@@ -53,6 +53,8 @@ Be sure that you have all dependencies by running:
 go mod tidy
 ```
 
+you'll probably need to put a _.netrc_ file with a token from your github user at the root of the project to download the dependencies. See Deploying -> locally for more info about the _.netrc_ file.
+
 Run the server with below command:
 
 ```Bash
