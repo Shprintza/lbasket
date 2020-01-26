@@ -39,15 +39,16 @@ func New(host string) *Client {
 // host: $LBASKET_SERVER_HOST
 // port: $LBASKET_SERVER_PORT
 func NewWithDefaults() *Client {
-	port, err := strconv.Atoi(os.Getenv(portKey))
-	if err != nil {
-		port = defaultPort
-	}
+
 	host := os.Getenv(hostKey)
 	key := os.Getenv(apiKeyKey)
 	client := New(host)
+	port, err := strconv.Atoi(os.Getenv(portKey))
+	if err == nil && port != 0 {
+		client = client.WithPort(port)
+	}
 
-	return client.WithPort(port).WithAPIKey(key)
+	return client.WithAPIKey(key)
 }
 
 // WithPort attaches desired port to underlying API Client.
