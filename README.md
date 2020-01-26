@@ -207,3 +207,7 @@ If you add or update any endpoint, please, update the `gcloud endpoints` gateway
 envsubst < openapi-appengine.tpl.yaml > openapi-appengine.yaml
 gcloud endpoints services deploy openapi-appengine.yaml
 ```
+
+### CI/CD
+
+Unfortunately, I only provide CI/CD for bitbucket repositories (You can see an example of deployment on that system at [bitbucket-pipelines.yml](./bitbucket-pipelines.yml) file), that is the builder that I usually use, and use of the github actions is not within the scope of this challenge.
