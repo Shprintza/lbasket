@@ -1,4 +1,4 @@
-module github.com/orov-io/lbasket
+module github.com/Shprintza/lbasket
 
 go 1.13
 
